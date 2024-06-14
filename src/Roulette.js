@@ -1,33 +1,44 @@
 /* global BigInt */
 
 import React, { useState, useEffect } from 'react';
-import Web3 from 'web3';  // Import Web3 if not available globally
+import Web3 from 'web3';
+import socketIoClient from 'socket.io-client';
 import rouletteContractAbi from './abis/rouletteContractAbi.json';
-import abi_random from './abis/randomContractAbi.json';  // Ensure this ABI is correctly configured for your contract
+import abi_random from './abis/randomContractAbi.json';
 import styles from './Roulette.module.css';
 
 const contractAddress = "0x0221344DA85B09fD275Fb13b513961b048C8B149";
 const flareRpcUrl = 'https://flare.solidifi.app/ext/C/rpc';
 const provider_flare = new Web3(flareRpcUrl);
 const randomContractAddress = "0x1000000000000000000000000000000000000003";
+const SOCKET_SERVER_URL = "https://localhost:3001"; // Update this with your actual server URL
 
 function Roulette({ web3 }) {
   const [betAmount, setBetAmount] = useState('');
   const [guess, setGuess] = useState('');
   const [message, setMessage] = useState('');
   const [randomNumber, setRandomNumber] = useState(null);
+  const [timer, setTimer] = useState(null);
 
   const contract = new web3.eth.Contract(rouletteContractAbi, contractAddress);
   const randomContract = new provider_flare.eth.Contract(abi_random, randomContractAddress);
-
+  
   useEffect(() => {
     fetchRandomNumber();
+
+    const socket = socketIoClient(SOCKET_SERVER_URL);
+    socket.on('timer', (data) => {
+      setTimer(data.countdown);
+    });
+
+    return () => {
+      socket.disconnect();
+    };
   }, []);
 
   const fetchRandomNumber = async () => {
     try {
       let randomBigNumber = await randomContract.methods.getCurrentRandom().call();
-      console.log(randomBigNumber)
       let randomNumber = randomBigNumber % BigInt(37);  // Keep the operation in BigInt
       setRandomNumber(Number(randomNumber));  // Convert to Number only after reducing the size
     } catch (error) {
@@ -53,6 +64,7 @@ function Roulette({ web3 }) {
     <div className={styles.roulette}>
       <h1 className={styles.title}>GreenRoulette</h1>
       {randomNumber !== null && <p>Current Random Number: {randomNumber}</p>}
+      {timer !== null && <p>Timer: {timer} seconds</p>}
       <div className={styles.inputGroup}>
         <input
           type="text"
