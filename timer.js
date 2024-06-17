@@ -15,7 +15,7 @@ const io = socketIo(server, {
     }
 });  
 
-const TIMER_DURATION = 90; // Duration of the timer in seconds
+const TIMER_DURATION = 240; // Duration of the timer in seconds
 let timer = TIMER_DURATION;
 
 // Function to start the countdown
