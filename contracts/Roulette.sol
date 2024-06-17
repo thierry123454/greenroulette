@@ -3,10 +3,9 @@ pragma solidity 0.8.17;
 
 contract Roulette {
     address private house_addr;
+    uint256 public bettingClosesAt;
 
     // Outcome & Meaning: 0 = Red, 1 = Black, 2 = Green
-    uint8 private outcome;
-    bool private outcomeSet = false;
     uint256 public temporaryBalance;
 
     // Betting details
@@ -36,10 +35,9 @@ contract Roulette {
         temporaryBalance += msg.value;
     }
 
-    // Function which house can use to set the outcome of the game.
-    function setOutcome(uint8 outcome_game) external onlyOwner {
-        outcome = outcome_game;
-        outcomeSet = true;
+    // Function which house can use to open the betting round.
+    function openBetting() external onlyOwner {
+        bettingClosesAt = block.timestamp + 2 minutes;  // Betting open for 2 minutes
     }
 
     // Pay house in case of security breach or transfer of funds.
@@ -49,10 +47,10 @@ contract Roulette {
 
     // Set bet
     function setBet (uint8 _guess) external payable {
-        require(msg.value > 0, "Bet amount must be greater than zero.");
-        require(temporaryBalance > msg.value, "Pool has insufficient funds for this bet. Bet with a lower amount or wait for more funding.");
+        require(block.timestamp < bettingClosesAt, "Betting is closed");
         require(_guess <= 1, "Invalid guess.");
-        require(playerBets[msg.sender].amount == 0, "You are not allowed to place two bets.");
+        require(msg.value > 0 && temporaryBalance > msg.value, "Bet amount invalid or pool low");
+        require(playerBets[msg.sender].amount == 0, "Already placed bet");
 
         bettors.push(msg.sender);
 
@@ -67,21 +65,20 @@ contract Roulette {
         emit BetPlaced(msg.sender, msg.value, _guess);
     }
 
-    // Payout winners once the outcome has been decided.
-    function payoutWinners() external onlyOwner {
-        require(outcomeSet, "Outcome of the game has to be decided.");
+    // Set outcome and payout winners.
+    function payoutWinners(uint8 outcome_game) external onlyOwner {
+        require(block.timestamp >= bettingClosesAt, "Betting period has not ended yet");
 
         for (uint i = 0; i < bettors.length; i++) {
             address bettor = bettors[i];
 
-            if (playerBets[bettor].guess == outcome) {
+            if (playerBets[bettor].guess == outcome_game) {
                 payable(bettor).transfer(playerBets[bettor].amount * 2);
             }
 
             delete playerBets[bettor];
         }
 
-        outcomeSet = false;
         temporaryBalance = address(this).balance;
 
         delete bettors;
