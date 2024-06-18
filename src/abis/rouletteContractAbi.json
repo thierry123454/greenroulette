@@ -30,6 +30,19 @@
 		"type": "event"
 	},
 	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "closedAt",
+				"type": "uint256"
+			}
+		],
+		"name": "BettingClosed",
+		"type": "event"
+	},
+	{
 		"inputs": [],
 		"name": "housePay",
 		"outputs": [],

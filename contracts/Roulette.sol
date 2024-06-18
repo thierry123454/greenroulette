@@ -18,6 +18,7 @@ contract Roulette {
     address[] public bettors;  // Array to keep track of all bettors
 
     event BetPlaced(address indexed player, uint256 amount, uint8 guess);
+    event BettingClosed(uint256 closedAt);
 
     // House deploys contract.
     constructor() {
@@ -38,6 +39,7 @@ contract Roulette {
     // Function which house can use to open the betting round.
     function openBetting() external onlyOwner {
         bettingClosesAt = block.timestamp + 2 minutes;  // Betting open for 2 minutes
+        emit BettingClosed(bettingClosesAt);  // Emit event with the future close time
     }
 
     // Pay house in case of security breach or transfer of funds.
