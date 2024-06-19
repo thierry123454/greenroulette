@@ -3,7 +3,7 @@ import socketIoClient from 'socket.io-client';
 import rouletteContractAbi from './abis/rouletteContractAbi.json';
 import styles from './Roulette.module.css';
 
-const contractAddress = "0xBD0A95d64DF1FD7d1B61707757dc446063375bf7";
+const contractAddress = "0x82158f08196Ad57E0fDDa621a5E4Cb6fD2525fE5";
 const SOCKET_SERVER_URL = "https://localhost:3001"; // Server URL
 
 function Roulette({ web3 }) {
@@ -21,14 +21,13 @@ function Roulette({ web3 }) {
       let displayedTime; // Declare a mutable variable
   
       if (data.stage === 3) {
-        setOutcome(data.game_outcome);
-
         if (data.countdown > 20) {
           displayedTime = data.countdown - 20;
           handleStageChange(3); // Spinning roulette
         } else {
           displayedTime = data.countdown; // Last 20 seconds countdown
           handleStageChange(4); // Handle outcome display
+          setOutcome(data.game_outcome);
         }
       } else {
         displayedTime = data.countdown; // Normal countdown handling
