@@ -7,7 +7,7 @@ function TransactionComponent() {
   const { gameState } = useContext(GameContext);
 
   useEffect(() => {
-    if (gameState.stage === 3) { // Example stage check, adjust based on your game logic
+    if (gameState.stage === 2) { // Example stage check, adjust based on your game logic
       navigate('/roulette');
     }
   }, [gameState, navigate]);

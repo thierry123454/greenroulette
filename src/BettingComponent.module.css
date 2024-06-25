@@ -1,80 +1,20 @@
-/* BettingComponent.module.css */
-* {
-  font-family: 'Inter', sans-serif;
-}
-
-body {
-  background-color: #f4f4f4;
-  overflow: hidden;
-}
-
-.container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  height: 100vh; /* Full viewport height */
-}
-
-.content {
-  background: white;
-  padding: 20px;
-  border-radius: 10px;
-  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-  width: 420px;
-  height: 300px;
-}
-
-.info {
-  border-radius: 10px;
-  background: linear-gradient(180deg, #CDFFBB 0%, #FFFFFF 100%);
-  box-shadow: inset 0px 0px 5px rgba(0, 0, 0, 0.5);
-  height: auto;
-  margin: 0 auto;
-  padding: 0px;
-  height: 150px;
-}
-
-.logo {
-  width: 1000px; /* Adjust as needed */
-}
-
-.line {
-  margin: 0;
-  border: none;
-  border: 1px solid #FFFFFF;
-  box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.5);
-}
-
-.status, .timer {
-  align-items: flex-start; /* Aligns children to the left */
-  justify-content: flex-start; /* Starts children from the top */
-  position: relative;
-  width: 100%;
-  height: 75px;
-}
-
-/* Styles specifically for the labels */
-.label {/* Status */
-  align-self: flex-start; /* Ensures the label aligns to the start */
-  width: 100%;
-  margin: 0; /* Removes any default margin */
-  margin-left: 5px;
-  padding: 0; /* Adjust padding as needed */
-  font-style: normal;
-  font-weight: 500;
-  font-size: 15px;
-  line-height: 150%;
-  color: rgba(0, 0, 0, 0.25);
-}
-
-/* Styles for the status indicator and timer display */
-.info_text {
-  text-align: center;
+.info::before {
+  content: "";
   position: absolute;
-  top: 50%; left: 50%;
-  transform: translate(-50%,-50%);
-  margin: auto auto 0; /* Centers horizontally and adds margin to the top */
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  box-shadow: inset 0px 0px 5px rgba(0, 0, 0, 0.5);
+  border-radius: 10px;
+  background: linear-gradient(180deg, #FFDCBB 0%, #FFFFFF 100%);
+  opacity: 0;
+  transition: opacity 1s ease-in-out;
+  z-index: 0;
+}
+
+.info.special::before {
+  opacity: 1;
 }
 
 #betting {
@@ -85,10 +25,20 @@ body {
 
   color: #248900;
 
+  transition: color 1s ease-in-out; 
+
   -webkit-text-stroke: 0.5px #FFFFFF;
 }
 
-#timer {
+#betting.special {
+  color: #CF7C00;
+}
+
+#timer.special {
+  opacity: 0;
+}
+
+#timer_overlay {
   font-style: normal;
   font-weight: 500;
   font-size: 35px;
@@ -99,10 +49,19 @@ body {
 
   text-shadow: 0px 0px 4px rgba(0, 0, 0, 0.25);
 
-  background: linear-gradient(0deg, #FFFFFF, #248900);
+  background: linear-gradient(0deg, #FFFFFF, #FF9900);
+
+  transition: opacity 1s ease-in-out;
+
   /* background-size: 200% 200%; */
   -webkit-background-clip: text;
   -webkit-text-stroke: 3px transparent;
+
+  opacity: 0;
+}
+
+#timer_overlay.special {
+  opacity: 1;
 }
 
 .betting {
