@@ -6,6 +6,7 @@
 body {
   background-color: #f4f4f4;
   overflow: hidden;
+  transition: opacity 1s ease-in;
 }
 
 .container {
@@ -14,6 +15,12 @@ body {
   align-items: center;
   justify-content: center;
   height: 100vh; /* Full viewport height */
+  opacity: 0;
+  transition: opacity 1s ease-in-out;
+}
+
+.container.loaded {
+  opacity: 1;
 }
 
 .content {

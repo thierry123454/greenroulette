@@ -19,13 +19,14 @@ const io = socketIo(server, {
   }
 });
 
-let stageOneTimer = 40;
-let secondaryTimer = 60;
+let stageOneTimer = 20;
+let secondaryTimer = 30;
 let stageThreeTimer = 50;
 
 let lastRandomNumber = null;
-let stage = 0; // Stage control: 0 - Initial, 1 - Waiting for Closure, 2 - Waiting for RN, 3 - Payout and Reopen
+let stage = 1; // Stage control: 0 - Initial, 1 - Waiting for Closure, 2 - Waiting for RN, 3 - Payout and Reopen
 let outcome = -1;
+let globalRandomNumber = -1;
 
 function startStageOne() {
   const countdown = setInterval(() => {
@@ -49,7 +50,7 @@ function checkBettingClosed() {
     console.log("Betting closed!")
     // Reset and start the secondary timer upon receiving the event
     clearInterval(bettingClosedCheck);
-    secondaryTimer = 60;
+    secondaryTimer = 30;
     startSecondaryTimer();
     return;
   }, 5000);
@@ -85,7 +86,7 @@ async function fetchRandomNumberUntilChange() {
       // Numbers have changed, proceed to stage 3
       prepareForPayout(currentRandomNumber);
     }
-    io.emit('timer', { countdown: -1, stage: 2 });
+    io.emit('timer', { countdown: 0, stage: 2 });
   } catch (error) {
     console.error('Error fetching random number:', error);
   }
@@ -104,8 +105,10 @@ function convertRandomNumber(randomNumber) {
 }
 
 async function prepareForPayout(randomNumber) {
-  stageThreeTimer = 50; // Reset stage one timer
+  stageThreeTimer = 50;
   stage = 3;
+  randomNumber = await fetchRandomNumber();
+  globalRandomNumber = randomNumber;
   outcome = convertRandomNumber(randomNumber);
 
   const countdown = setInterval(() => {
@@ -120,7 +123,7 @@ async function prepareForPayout(randomNumber) {
     }
     stageThreeTimer--;
     console.log("Stage 3:", stageThreeTimer);
-    io.emit('timer', { countdown: stageThreeTimer, stage: 3, game_outcome: outcome });
+    io.emit('timer', { countdown: stageThreeTimer, stage: 3, game_outcome: randomNumber });
   }, 1000);
 }
 
@@ -130,8 +133,9 @@ async function fetchRandomNumber() {
 }
 
 // Start the initial stage as soon as the server starts
-startStageOne();
+// startStageOne();
 checkBettingClosed();
+// prepareForPayout(0);
 
 // Handling a new connection
 io.on('connection', (socket) => {
@@ -144,7 +148,7 @@ io.on('connection', (socket) => {
   } else if (stage == 2) {
     io.emit('timer', { countdown: -1, stage: 2 });
   } else {
-    io.emit('timer', { countdown: stageThreeTimer, stage: 3, game_outcome: outcome });
+    io.emit('timer', { countdown: stageThreeTimer, stage: 3, game_outcome: globalRandomNumber });
   }
 
   socket.on('disconnect', () => {

@@ -14,14 +14,21 @@ function BettingComponent() {
   const navigate = useNavigate();
   const { gameState, setGameState } = useContext(GameContext);
   const [specialStyle, setSpecialStyle] = useState(false);
+  const [isLoaded, setIsLoaded] = useState(false); // State to track loading
+
+  useEffect(() => {
+    setIsLoaded(true); // Set to true when component mounts
+  }, []);
   
   useEffect(() => {
     const timerHandler = (data) => {
       console.log('Timer data received:', data);
       setGameState(prevState => ({ ...prevState, timer: data.countdown, stage: data.stage }));
 
+      console.log(data.stage);
+
       // Check navigation condition immediately after state update
-      if (data.stage === 1) {
+      if (data.stage != 0) {
         console.log("Navigating to transactions due to stage 1.");
         navigate('/transactions');
       }
@@ -36,8 +43,10 @@ function BettingComponent() {
   }, [setGameState, navigate]); // Removed gameState from the dependency array
 
   useEffect(() => {
-    if (gameState.timer <= 30) {
+    if (gameState.timer <= 30 && gameState.timer >= 1) {
       setSpecialStyle(true);
+    } else if (gameState.timer <= 0) {
+      setIsLoaded(false);
     } else {
       setSpecialStyle(false);
     }
@@ -45,10 +54,10 @@ function BettingComponent() {
     if (gameState.stage === 1) {
       navigate('/transactions');
     }
-  }, [gameState, navigate]);
+  }, [gameState, navigate, isLoaded]);
 
   return (
-    <div className={commonStyles.container}>
+    <div className={`${commonStyles.container} ${isLoaded ? commonStyles.loaded : ''}`}>
       <div>
         <Logo className={commonStyles.logo} />
       </div>

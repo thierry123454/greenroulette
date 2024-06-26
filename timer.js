@@ -47,6 +47,7 @@ let stageThreeTimer = 50;
 let lastRandomNumber = null;
 let stage = 0; // Stage control: 0 - Initial, 1 - Waiting for Closure, 2 - Waiting for RN, 3 - Payout and Reopen
 let outcome = -1;
+let globalRandomNumber = -1;
 
 function startStageOne() {
   const countdown = setInterval(() => {
@@ -132,6 +133,7 @@ function convertRandomNumber(randomNumber) {
 async function prepareForPayout(randomNumber) {
   stageThreeTimer = 50; // Reset stage one timer
   stage = 3;
+  globalRandomNumber = randomNumber;
   outcome = convertRandomNumber(randomNumber);
   payoutWinners(outcome);
   openBettingAtFourty(); // Open betting 40 seconds into stage 3
@@ -148,7 +150,7 @@ async function prepareForPayout(randomNumber) {
     }
     stageThreeTimer--;
     console.log("Stage 3:", stageThreeTimer);
-    io.emit('timer', { countdown: stageThreeTimer, stage: 3, game_outcome: outcome });
+    io.emit('timer', { countdown: stageThreeTimer, stage: 3, game_outcome: randomNumber });
   }, 1000);
 }
 
@@ -196,7 +198,7 @@ io.on('connection', (socket) => {
   } else if (stage == 2) {
     io.emit('timer', { countdown: -1, stage: 2 });
   } else {
-    io.emit('timer', { countdown: stageThreeTimer, stage: 3, game_outcome: outcome });
+    io.emit('timer', { countdown: stageThreeTimer, stage: 3, game_outcome: globalRandomNumber });
   }
 
   socket.on('disconnect', () => {
