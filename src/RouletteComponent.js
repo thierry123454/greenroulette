@@ -9,6 +9,7 @@ import { ReactComponent as Arrow } from './images/arrow.svg'
 import commonStyles from './CommonStyles.module.css';
 import styles from './RouletteComponent.module.css';
 import io from 'socket.io-client';
+import JoinLateNotice from './JoinLateNotice';
 
 // Define the roulette numbers and their colors
 const rouletteNumbers = "3-26-0-32-15-19-4-21-2-25-17-34-6-27-13-36-11-30-8-23-10-5-24-16-33-1-20-14-31-9-22-18-29-7-28-12-35".split('-');
@@ -31,7 +32,7 @@ function RouletteComponent() {
   const navigate = useNavigate();
   const { gameState, setGameState } = useContext(GameContext);
   const [isLoaded, setIsLoaded] = useState(false); // State to track loading
-  const [transformX, setTransformX] = useState(0);
+  const [transformX, setTransformX] = useState(-45);
 
   useEffect(() => {
     setIsLoaded(true); // Set to true when component mounts
@@ -93,6 +94,7 @@ function RouletteComponent() {
           })}
         </div>
       </div>
+      {!gameState.has_visited_bet && <JoinLateNotice />}
     </div>
   );
 }

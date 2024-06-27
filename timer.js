@@ -49,7 +49,24 @@ let stage = 0; // Stage control: 0 - Initial, 1 - Waiting for Closure, 2 - Waiti
 let outcome = -1;
 let globalRandomNumber = -1;
 
+const fetch = require('node-fetch');
+let currentEthPrice = -1;
+
+const getEthPrice = async () => {
+  const apiKey = process.env.CRYPTO_COMPARE_API_KEY; // Ensure you have this in your environment variables
+  const url = `https://min-api.cryptocompare.com/data/price?fsym=ETH&tsyms=USD&api_key=${apiKey}`;
+  
+  try {
+    const response = await fetch(url);
+    const data = await response.json();
+    currentEthPrice = data.USD;
+  } catch (error) {
+    console.error("Error fetching ETH price:", error);
+  }
+};
+
 function startStageOne() {
+  getEthPrice();
   const countdown = setInterval(() => {
     if (stageOneTimer <= 0) {
       console.log("Stage 1 ended.");
@@ -57,9 +74,15 @@ function startStageOne() {
       stage = 1;
       return;
     }
+
+    // Fetch ETH price every 10 seconds
+    if (stageOneTimer % 10 === 0) {
+      getEthPrice();
+    }
+
+    console.log("Stage 0:", stageOneTimer);
+    io.emit('timer', { countdown: stageOneTimer, stage: 0, exchange: currentEthPrice });
     stageOneTimer--;
-    console.log("Stage 1:", stageOneTimer);
-    io.emit('timer', { countdown: stageOneTimer, stage: 0 });
   }, 1000);
 }
 
@@ -192,7 +215,7 @@ io.on('connection', (socket) => {
   console.log('New client connected');
   
   if (stage == 0) {
-    io.emit('timer', { countdown: stageOneTimer, stage: 0 });
+    io.emit('timer', { countdown: stageOneTimer, stage: 0, currentEthPrice });
   } else if (stage == 1) {
     io.emit('timer', { countdown: secondaryTimer, stage: 1 });
   } else if (stage == 2) {

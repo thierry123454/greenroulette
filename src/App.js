@@ -1,15 +1,38 @@
-import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
 import BettingComponent from './BettingComponent';
 import TransactionComponent from './TransactionComponent';
 import RouletteComponent from './RouletteComponent';
 import OutcomeComponent from './OutcomeComponent';
+import Web3 from 'web3';
+import detectEthereumProvider from '@metamask/detect-provider';
 
 function App() {
+  const [web3, setWeb3] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function init() {
+      const provider = await detectEthereumProvider();
+      if (provider) {
+        await provider.request({ method: 'eth_requestAccounts' });
+        setWeb3(new Web3(provider));
+        setLoading(false);
+      } else {
+        console.error('Please install MetaMask!');
+      }
+    }
+    init();
+  }, []);
+
+  if (loading) {
+    return <div>Loading...</div>;
+  }
+
   return (
     <Router>
       <Routes>
-        <Route path="/" element={<BettingComponent />} />
+        <Route path="/" element={<BettingComponent web3={web3} />} />
         <Route path="/transactions" element={<TransactionComponent />} />
         <Route path="/roulette" element={<RouletteComponent />} />
         <Route path="/outcome" element={<OutcomeComponent />} />
@@ -17,5 +40,6 @@ function App() {
     </Router>
   );
 }
+
 
 export default App;

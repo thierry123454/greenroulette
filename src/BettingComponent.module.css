@@ -99,21 +99,32 @@
   border-radius: 10px;
   height: 50px;
   font-size: 20px;
+  position: relative;
 }
 
 .red {
   background-color: #CA0000;
+  cursor: default;
 }
 
-.red:hover {
+.canHoverRed {
+  cursor: pointer !important;
+}
+
+.canHoverRed:hover {
   background-color: #ba0000;
 }
 
 .black {
   background-color: #171717;
+  cursor: default;
 }
 
-.black:hover {
+.canHoverBlack {
+  cursor: pointer !important;
+}
+
+.canHoverBlack:hover {
   background-color: #000000;
 }
 
@@ -138,4 +149,16 @@
   padding: 2px;
   color: white;
   -webkit-text-stroke: 0.5px #000000;
+}
+
+.selected::before {
+  border-radius: inherit;
+  content: '';
+  background-image: linear-gradient(to bottom, #CDFFBB 0%, #00C2FF 100%);
+  top: -3px;
+  left: -3px;
+  bottom: -3px;
+  right: -3px;
+  position: absolute;
+  z-index: -1;
 }

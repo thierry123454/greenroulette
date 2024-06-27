@@ -30,6 +30,7 @@ body {
   box-shadow: 0 4px 8px rgba(0,0,0,0.1);
   width: 420px;
   height: 300px;
+  z-index: 0;
 }
 
 .info {
@@ -107,4 +108,18 @@ body {
   /* background-size: 200% 200%; */
   -webkit-background-clip: text;
   -webkit-text-stroke: 3px transparent;
+}
+
+#joinLateText {
+  font-weight: 500;
+  font-size: 20px;
+  line-height: 150%;
+
+  background: linear-gradient(180deg, #CDFFBB 0%, rgba(0, 194, 255, 0.25) 87.36%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-fill-color: transparent;
+
+  -webkit-text-stroke: 0.25px #000000;
 }

@@ -7,6 +7,7 @@ import { ReactComponent as RouletteSpinning } from './images/roulette_spinning.s
 import commonStyles from './CommonStyles.module.css';
 import styles from './TransactionComponent.module.css';
 import io from 'socket.io-client';
+import JoinLateNotice from './JoinLateNotice';
 
 // Initialize socket connection
 const socket = io('https://localhost:3001', { secure: true });
@@ -16,10 +17,6 @@ function TransactionComponent() {
   const { gameState, setGameState } = useContext(GameContext);
   const [specialStyle, setSpecialStyle] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false); // State to track loading
-
-  useEffect(() => {
-    setIsLoaded(true); // Set to true when component mounts
-  }, []);
 
   useEffect(() => {
     const timerHandler = (data) => {
@@ -36,10 +33,14 @@ function TransactionComponent() {
   }, [setGameState, navigate]); // Removed gameState from the dependency array
 
   useEffect(() => {
-    if (gameState.stage == 2 || gameState.stage == 3) {
-      setSpecialStyle(true);
-    } else {
+    if (gameState.timer > 1 && gameState.stage == 1) {
       setSpecialStyle(false);
+    } else {
+      setSpecialStyle(true);
+    }
+
+    if (gameState.stage == 1 || gameState.stage == 2){ 
+      setIsLoaded(true);
     }
 
     if (gameState.stage === 3) { // Example stage check, adjust based on your game logic
@@ -72,6 +73,7 @@ function TransactionComponent() {
           <RouletteSpinning id={styles.spinning} />
         </div>
       </div>
+      {!gameState.has_visited_bet && <JoinLateNotice />}
     </div>
   );
 }

@@ -116,7 +116,8 @@ async function prepareForPayout(randomNumber) {
       console.log("Stage 3 ended.");
       clearInterval(countdown);
       stage = 0;
-      stageOneTimer = 100;
+      stageOneTimer = 30;
+      checkBettingClosed();
       startStageOne(); // Restart stage one
       outcome = -1;
       return;

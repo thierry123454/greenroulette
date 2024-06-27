@@ -5,7 +5,10 @@ export const GameContext = createContext();
 export const GameProvider = ({ children }) => {
   const [gameState, setGameState] = useState({
     stage: null,
-    outcome: null
+    outcome: null,
+    bet: { amount: null, placed: null, choice: null }, // Add bet details
+    exchange: null,
+    has_visited_bet: false
   });
 
   return (
