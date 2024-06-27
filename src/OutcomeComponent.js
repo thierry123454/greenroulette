@@ -79,7 +79,7 @@ function TransactionComponent() {
             <div className={`${commonStyles.timer} ${styles.donatedInfo}`}>
               <h2 className={styles.title}>Total Donated This Round🌍*</h2>
               <span className={styles.amount}>-$</span>
-              <span id={styles.subtext}>* Actual donation amount may be less if further bets decrease pool size.</span>
+              <span id={styles.subtext}>* Actual donation amount may be less if future bets decrease pool size.</span>
             </div>
         </div>
         <span id={styles.timer}>Next Round: {gameState.timer}</span>
