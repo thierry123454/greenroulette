@@ -17,7 +17,6 @@ contract Roulette {
     mapping(address => BetDetails) public playerBets;
     address[] public bettors;  // Array to keep track of all bettors
 
-    event BetPlaced(address indexed player, uint256 amount, uint8 guess);
     event BettingClosed(uint256 closedAt);
 
     // House deploys contract.
@@ -52,7 +51,7 @@ contract Roulette {
         require(block.timestamp < bettingClosesAt, "Betting is closed");
         require(_guess <= 1, "Invalid guess.");
         require(msg.value > 0 && temporaryBalance > msg.value, "Bet amount invalid or pool low");
-        require(playerBets[msg.sender].amount == 0, "Already placed bet");
+        require(playerBets[msg.sender].amount == 0, "Already placesd bet");
 
         bettors.push(msg.sender);
 
@@ -63,8 +62,6 @@ contract Roulette {
         });
 
         temporaryBalance -= msg.value;
-
-        emit BetPlaced(msg.sender, msg.value, _guess);
     }
 
     // Set outcome and payout winners.
@@ -89,6 +86,10 @@ contract Roulette {
     // View balance of pool.
     function viewPool() external view returns(uint256){
         return address(this).balance;
+    }
+
+    function getNumberOfBets() external view returns(uint) {
+        return bettors.length;
     }
 
     receive() external payable {}

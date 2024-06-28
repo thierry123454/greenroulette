@@ -147,6 +147,7 @@
   height: fit-content;
   margin: 10px auto 10px;
   padding: 2px;
+  padding-right: 7px;
   color: white;
   -webkit-text-stroke: 0.5px #000000;
 }

@@ -27,7 +27,7 @@ const io = socketIo(server, {
 // Roulette Contract
 const infuraUrl = process.env.INFURA_URL;
 const privateKey = process.env.PRIVATE_KEY_HOUSE;
-const rouletteContractAddress = "0x82158f08196Ad57E0fDDa621a5E4Cb6fD2525fE5";
+const rouletteContractAddress = "0xC556E1690B9256DD018b513E56B011f43678CaED";
 
 // Random Number Contract
 const flareRpcUrl = 'https://flare.solidifi.app/ext/C/rpc';
@@ -52,6 +52,11 @@ let globalRandomNumber = -1;
 const fetch = require('node-fetch');
 let currentEthPrice = -1;
 
+let totalRed = 0;
+let totalBlack = 0;
+
+let lastCheckedIndex = 0;  // To track the last index of bets we checked
+
 const getEthPrice = async () => {
   const apiKey = process.env.CRYPTO_COMPARE_API_KEY; // Ensure you have this in your environment variables
   const url = `https://min-api.cryptocompare.com/data/price?fsym=ETH&tsyms=USD&api_key=${apiKey}`;
@@ -67,6 +72,11 @@ const getEthPrice = async () => {
 
 function startStageOne() {
   getEthPrice();
+
+  totalRed = 0; // Reset totals when going back to stage 0
+  totalBlack = 0;
+  lastCheckedIndex = 0;
+
   const countdown = setInterval(() => {
     if (stageOneTimer <= 0) {
       console.log("Stage 1 ended.");
@@ -75,15 +85,39 @@ function startStageOne() {
       return;
     }
 
-    // Fetch ETH price every 10 seconds
+    // Fetch ETH price every 10 seconds and check new bets.
     if (stageOneTimer % 10 === 0) {
       getEthPrice();
+      checkNewBets();
     }
 
     console.log("Stage 0:", stageOneTimer);
     io.emit('timer', { countdown: stageOneTimer, stage: 0, exchange: currentEthPrice });
     stageOneTimer--;
   }, 1000);
+}
+
+async function checkNewBets() {
+  console.log("Checking for bets.");
+  const bettorCount = await rouletteContract.methods.getNumberOfBets().call();
+  for (let i = lastCheckedIndex; i < bettorCount; i++) {
+    const bettor = await rouletteContract.methods.bettors(i).call();
+    const betDetails = await rouletteContract.methods.playerBets(bettor).call();
+    const ethAmount = parseFloat(web3.utils.fromWei(betDetails.amount, 'ether'));
+    const guess =  Number(betDetails.guess);
+
+    console.log(`New bet from ${bettor}: Amount ${web3.utils.fromWei(betDetails.amount, 'ether')} ETH on ${guess === 0 ? 'Red' : 'Black'}`);
+
+    console.log("BET: ", guess);
+
+    if (guess === 0) {
+      totalRed += ethAmount;
+    } else {
+      totalBlack += ethAmount;
+    }
+    
+    lastCheckedIndex++;
+  }
 }
 
 function checkBettingClosed() {
@@ -108,7 +142,14 @@ function checkBettingClosed() {
 
 function startSecondaryTimer() {
   const secondaryCountdown = setInterval(() => {
+    console.log("Betting closes in:", secondaryTimer)
     if (stage == 1) {
+      // Fetch ETH price every 10 seconds and check new bets.
+      if (secondaryTimer % 10 === 0) {
+        getEthPrice();
+        checkNewBets();
+      }
+
       if (secondaryTimer <= 0) {
         console.log("Stage is 1 and betting has closed. Fetching RN.")
         clearInterval(secondaryCountdown);
@@ -154,7 +195,7 @@ function convertRandomNumber(randomNumber) {
 }
 
 async function prepareForPayout(randomNumber) {
-  stageThreeTimer = 50; // Reset stage one timer
+  stageThreeTimer = 50; // Reset stage three timer
   stage = 3;
   globalRandomNumber = randomNumber;
   outcome = convertRandomNumber(randomNumber);
@@ -162,6 +203,7 @@ async function prepareForPayout(randomNumber) {
   openBettingAtFourty(); // Open betting 40 seconds into stage 3
 
   const countdown = setInterval(() => {
+    getEthPrice();
     if (stageThreeTimer <= 0) {
       console.log("Stage 3 ended.");
       clearInterval(countdown);
@@ -173,7 +215,7 @@ async function prepareForPayout(randomNumber) {
     }
     stageThreeTimer--;
     console.log("Stage 3:", stageThreeTimer);
-    io.emit('timer', { countdown: stageThreeTimer, stage: 3, game_outcome: randomNumber });
+    io.emit('timer', { countdown: stageThreeTimer, stage: 3, exchange: currentEthPrice, game_outcome: randomNumber, total_red: totalRed, total_black: totalBlack });
   }, 1000);
 }
 
@@ -207,8 +249,8 @@ async function fetchRandomNumber() {
 }
 
 // Start the initial stage as soon as the server starts
+openBetting()
 startStageOne();
-checkBettingClosed();
 
 // Handling a new connection
 io.on('connection', (socket) => {
@@ -221,7 +263,7 @@ io.on('connection', (socket) => {
   } else if (stage == 2) {
     io.emit('timer', { countdown: -1, stage: 2 });
   } else {
-    io.emit('timer', { countdown: stageThreeTimer, stage: 3, game_outcome: globalRandomNumber });
+    io.emit('timer', { countdown: stageThreeTimer, stage: 3, exchange: currentEthPrice, game_outcome: globalRandomNumber, total_red: totalRed, total_black: totalBlack });
   }
 
   socket.on('disconnect', () => {

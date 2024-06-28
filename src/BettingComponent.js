@@ -9,7 +9,7 @@ import metamaskLogo from'./images/metamask.png';
 import rouletteContractAbi from './abis/rouletteContractAbi.json';
 import detectEthereumProvider from '@metamask/detect-provider';
 
-const contractAddress = "0x82158f08196Ad57E0fDDa621a5E4Cb6fD2525fE5";
+const contractAddress = "0xC556E1690B9256DD018b513E56B011f43678CaED";
 
 // Initialize socket connection
 const socket = io('https://localhost:3001', { secure: true });
@@ -20,7 +20,7 @@ function BettingComponent({ web3 }) {
   const [ethAmount, setEthAmount] = useState('');
 
   const navigate = useNavigate();
-  const { gameState, setGameState } = useContext(GameContext);
+  const { gameState, setGameState, resetGameState } = useContext(GameContext);
   const [specialStyle, setSpecialStyle] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false); // State to track loading
   const [betPlaced, setIsPlaced] = useState(-1); // State to track loading
@@ -36,6 +36,13 @@ function BettingComponent({ web3 }) {
       setEthAmount(ethEquivalent.toFixed(4));
     }
   }, [betAmount, gameState.exchange]);
+
+  // Reset game state when component mounts
+  useEffect(() => {
+    resetGameState(); // Reset game state on component mount
+
+    // Additional logic to set up or fetch initial data if necessary
+  }, [resetGameState]);
 
   // Fade-In Animation
   useEffect(() => {
@@ -129,7 +136,7 @@ function BettingComponent({ web3 }) {
       });
       setGameState(prevState => ({
         ...prevState,
-        bet: { amount: betAmount, placed: true, choice: guess }
+        bet: { amount: ethAmount, placed: true, choice: guess }
       }));
       setIsPlaced(guess);
     } catch (error) {
