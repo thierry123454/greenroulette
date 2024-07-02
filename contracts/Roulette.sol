@@ -16,6 +16,9 @@ contract Roulette {
 
     mapping(address => BetDetails) public playerBets;
     address[] public bettors;  // Array to keep track of all bettors
+    
+    address[] public charities;
+    uint256 public totalDonated;
 
     event BettingClosed(uint256 closedAt);
 
@@ -23,6 +26,7 @@ contract Roulette {
     constructor() {
         house_addr = msg.sender;
         temporaryBalance = address(this).balance;
+        totalDonated = 0;
     }
 
     modifier onlyOwner() {
@@ -30,8 +34,8 @@ contract Roulette {
         _;
     }
 
-    // Function which house can use to supply funding to the pool.
-    function housePay() external payable onlyOwner {
+    // Function which can used to supply funding to the pool.
+    function donate() external payable {
         temporaryBalance += msg.value;
     }
 
@@ -81,6 +85,37 @@ contract Roulette {
         temporaryBalance = address(this).balance;
 
         delete bettors;
+    }
+
+    function addCharity(address _charity) external onlyOwner {
+        charities.push(_charity);
+    }
+
+    function removeCharity(uint index) external onlyOwner {
+        require(index < charities.length, "Index out of bounds.");
+        for (uint i = index; i < charities.length - 1; i++) {
+            charities[i] = charities[i + 1];
+        }
+        charities.pop();
+    }
+
+    function distributeFunds() external onlyOwner {
+        require(temporaryBalance > 0, "Insufficient funds");
+
+        uint256 houseShare = temporaryBalance * 1 / 100;
+        uint256 charityShare = temporaryBalance * 3 / 100;
+
+        totalDonated += charityShare;
+
+        uint256 perCharityShare = charityShare / charities.length;
+
+        payable(house_addr).transfer(houseShare);
+
+        for (uint i = 0; i < charities.length; i++) {
+            payable(charities[i]).transfer(perCharityShare);
+        }
+        
+        temporaryBalance -= houseShare + charityShare;
     }
 
     // View balance of pool.

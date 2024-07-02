@@ -27,7 +27,7 @@ const io = socketIo(server, {
 // Roulette Contract
 const infuraUrl = process.env.INFURA_URL;
 const privateKey = process.env.PRIVATE_KEY_HOUSE;
-const rouletteContractAddress = "0xC556E1690B9256DD018b513E56B011f43678CaED";
+const rouletteContractAddress = "0x2DF14FAF7E0a1E1dc49eAaB612EFFcF19aCB5CFe";
 
 // Random Number Contract
 const flareRpcUrl = 'https://flare.solidifi.app/ext/C/rpc';

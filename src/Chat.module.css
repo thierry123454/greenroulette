@@ -1,0 +1,120 @@
+.chatContainer {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  width: 300px;
+  height: 400px;
+  display: flex;
+  flex-direction: column;
+  border-radius: 12px;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+  z-index: 1000;
+  overflow: hidden;
+}
+
+#logo {
+  transform: scale(1.5);
+  position: relative;
+  left: 10px;
+  top: -3px;
+}
+
+#x {
+  cursor: pointer;
+  font-style: normal;
+  font-weight: 500;
+  font-size: 25px;
+  line-height: 150%;
+  text-shadow: 0px 0px 4px rgba(0, 0, 0, 0.25);
+}
+
+.chatHeader {
+  background-color: #00C2FF;
+  color: white;
+  padding: 5px 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-weight: bold;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5); /* Horizontal offset, vertical offset, blur radius, color */
+  z-index: 1000;
+  overflow: visible;
+}
+
+.chatTotalBets {
+  display: flex;
+  justify-content: space-between;
+  padding: 0;
+  color: white;
+  text-align: center;
+}
+
+.totalRed {
+  padding: 0px 10px;
+  padding-bottom: 5px;
+  width: 50%;
+  background: linear-gradient(0deg, #CA0000 0%, #FF0000 100%);
+}
+
+.totalBlack {
+  padding: 0px 10px;
+  width: 50%;
+  background: linear-gradient(180deg, #000000 0%, #171717 100%);
+}
+
+#labelRed {
+  font-style: normal;
+  font-weight: 500;
+  font-size: 12px;
+  color: rgba(0, 0, 0, 0.25);
+}
+
+#labelBlack {
+  font-style: normal;
+  font-weight: 500;
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.25);
+}
+
+.messages {
+  flex-grow: 1;
+  padding: 10px;
+  overflow-y: auto;
+  background: #EAEAEA;
+}
+
+.message {
+  margin-bottom: 8px;
+  padding: 5px 10px;
+  background: #f1f1f1;
+  border-radius: 18px;
+  max-width: 80%;
+}
+
+.you {
+  align-self: flex-end;
+  background: #00bfff;
+  color: white;
+}
+
+.inputArea {
+  display: flex;
+  padding: 10px;
+  background-color: #f1f1f1;
+  border-top: 1px solid #ccc;
+}
+
+.inputArea input {
+  flex-grow: 1;
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 18px;
+  margin-right: 5px;
+}
+
+.inputArea svg {
+  padding: 8px 10px;
+  border: none;
+  cursor: pointer;
+  transform: scale(1.7);
+}

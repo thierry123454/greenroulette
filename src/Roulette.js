@@ -3,7 +3,7 @@ import socketIoClient from 'socket.io-client';
 import rouletteContractAbi from './abis/rouletteContractAbi.json';
 import styles from './Roulette.module.css';
 
-const contractAddress = "0x82158f08196Ad57E0fDDa621a5E4Cb6fD2525fE5";
+const contractAddress = "0x2DF14FAF7E0a1E1dc49eAaB612EFFcF19aCB5CFe";
 const SOCKET_SERVER_URL = "https://localhost:3001"; // Server URL
 
 function Roulette({ web3 }) {

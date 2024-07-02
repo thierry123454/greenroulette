@@ -9,7 +9,7 @@ import metamaskLogo from'./images/metamask.png';
 import rouletteContractAbi from './abis/rouletteContractAbi.json';
 import detectEthereumProvider from '@metamask/detect-provider';
 
-const contractAddress = "0xC556E1690B9256DD018b513E56B011f43678CaED";
+const contractAddress = "0x2DF14FAF7E0a1E1dc49eAaB612EFFcF19aCB5CFe";
 
 // Initialize socket connection
 const socket = io('https://localhost:3001', { secure: true });

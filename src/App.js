@@ -1,9 +1,10 @@
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import React, { useEffect, useState } from 'react';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import BettingComponent from './BettingComponent';
 import TransactionComponent from './TransactionComponent';
 import RouletteComponent from './RouletteComponent';
 import OutcomeComponent from './OutcomeComponent';
+import Chat from './Chat'; // Import the chat component
 import Web3 from 'web3';
 import detectEthereumProvider from '@metamask/detect-provider';
 
@@ -31,15 +32,15 @@ function App() {
 
   return (
     <Router>
-      <Routes>
-        <Route path="/" element={<BettingComponent web3={web3} />} />
-        <Route path="/transactions" element={<TransactionComponent />} />
-        <Route path="/roulette" element={<RouletteComponent />} />
-        <Route path="/outcome" element={<OutcomeComponent />} />
-      </Routes>
+        <Chat /> {/* This will render the chat component on every page */}
+        <Routes>
+          <Route path="/" element={<BettingComponent web3={web3} />} />
+          <Route path="/transactions" element={<TransactionComponent />} />
+          <Route path="/roulette" element={<RouletteComponent />} />
+          <Route path="/outcome" element={<OutcomeComponent />} />
+        </Routes>
     </Router>
   );
 }
-
 
 export default App;

@@ -1,5 +1,25 @@
 [
 	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "_charity",
+				"type": "address"
+			}
+		],
+		"name": "addCharity",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "distributeFunds",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
 		"inputs": [],
 		"stateMutability": "nonpayable",
 		"type": "constructor"
@@ -19,7 +39,7 @@
 	},
 	{
 		"inputs": [],
-		"name": "housePay",
+		"name": "donate",
 		"outputs": [],
 		"stateMutability": "payable",
 		"type": "function"
@@ -40,6 +60,19 @@
 			}
 		],
 		"name": "payoutWinners",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "index",
+				"type": "uint256"
+			}
+		],
+		"name": "removeCharity",
 		"outputs": [],
 		"stateMutability": "nonpayable",
 		"type": "function"
@@ -101,6 +134,25 @@
 		"type": "function"
 	},
 	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"name": "charities",
+		"outputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
 		"inputs": [],
 		"name": "getNumberOfBets",
 		"outputs": [
@@ -140,6 +192,19 @@
 	{
 		"inputs": [],
 		"name": "temporaryBalance",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "totalDonated",
 		"outputs": [
 			{
 				"internalType": "uint256",
