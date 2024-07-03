@@ -41,7 +41,7 @@ function RouletteComponent() {
   useEffect(() => {
     const timerHandler = (data) => {
       console.log('Timer data received:', data);
-      setGameState(prevState => ({ ...prevState, timer: data.countdown, stage: data.stage, outcome: data.game_outcome }));
+      setGameState(prevState => ({ ...prevState, timer: data.countdown, stage: data.stage, exchange: data.exchange, total_red: data.total_red, total_black: data.total_black }));
     };
 
     // Listen for timer updates from server

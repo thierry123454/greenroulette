@@ -70,6 +70,16 @@ const getEthPrice = async () => {
   }
 };
 
+function emitInfo(countdown, stage) {
+  io.emit('timer', {
+    countdown: countdown,
+    stage: stage,
+    exchange: currentEthPrice,
+    total_red: totalRed,
+    total_black: totalBlack
+  });
+}
+
 function startStageOne() {
   getEthPrice();
 
@@ -92,7 +102,7 @@ function startStageOne() {
     }
 
     console.log("Stage 0:", stageOneTimer);
-    io.emit('timer', { countdown: stageOneTimer, stage: 0, exchange: currentEthPrice });
+    emitInfo(stageOneTimer, 0);
     stageOneTimer--;
   }, 1000);
 }
@@ -108,7 +118,14 @@ async function checkNewBets() {
 
     console.log(`New bet from ${bettor}: Amount ${web3.utils.fromWei(betDetails.amount, 'ether')} ETH on ${guess === 0 ? 'Red' : 'Black'}`);
 
-    console.log("BET: ", guess);
+    const message = {
+      user: bettor,
+      betAmount: ethAmount,
+      betChoice: guess
+    };
+
+    // Emit the special bet message to all connected clients
+    io.emit('special bet message', message);
 
     if (guess === 0) {
       totalRed += ethAmount;
@@ -158,7 +175,7 @@ function startSecondaryTimer() {
         stage = 2;
         return;
       }
-      io.emit('timer', { countdown: secondaryTimer, stage: 1 });
+      emitInfo(secondaryTimer, 1);
     }
     secondaryTimer--;
   }, 1000);
@@ -176,7 +193,7 @@ async function fetchRandomNumberUntilChange() {
       // Numbers have changed, proceed to stage 3
       prepareForPayout(currentRandomNumber);
     }
-    io.emit('timer', { countdown: -1, stage: 2 });
+    emitInfo(-1, 2);
   } catch (error) {
     console.error('Error fetching random number:', error);
   }
@@ -257,11 +274,11 @@ io.on('connection', (socket) => {
   console.log('New client connected');
   
   if (stage == 0) {
-    io.emit('timer', { countdown: stageOneTimer, stage: 0, currentEthPrice });
+    emitInfo(stageOneTimer, 0);
   } else if (stage == 1) {
-    io.emit('timer', { countdown: secondaryTimer, stage: 1 });
+    emitInfo(secondaryTimer, 1);
   } else if (stage == 2) {
-    io.emit('timer', { countdown: -1, stage: 2 });
+    emitInfo(-1, 2);
   } else {
     io.emit('timer', { countdown: stageThreeTimer, stage: 3, exchange: currentEthPrice, game_outcome: globalRandomNumber, total_red: totalRed, total_black: totalBlack });
   }

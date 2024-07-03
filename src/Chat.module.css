@@ -49,6 +49,10 @@
   font-weight: 500;
   font-size: 17px;
   text-align: center;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+  z-index: 999;
+  overflow: hidden;
+  height: 46px;
 }
 
 .totalRed {
@@ -78,32 +82,76 @@
   color: rgba(255, 255, 255, 0.25);
 }
 
+#userInfo {
+  font-size: 10px;
+}
+
 .messages {
   flex-grow: 1;
-  padding: 10px;
+  padding: 0px;
+  height: 250px;
   overflow-y: auto;
+  overflow-x: hidden;
   background: #EAEAEA;
+  display: flex;
+  flex-direction: column;
 }
 
 .message {
-  margin-bottom: 8px;
+  margin-bottom: 5px;
   padding: 5px 10px;
-  background: #f1f1f1;
-  border-radius: 18px;
+}
+
+.message.you {
+  background: none;
+  float: right;
+  text-align: right;
+}
+
+.messageContent {
+  float: left;
+  padding: 10px;
+  font-size: 12px;
   max-width: 80%;
+  overflow-x: auto;
+  text-align: left;
+  box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
+  border-radius: 10px;
+  background: white;
+}
+
+.messageContent.betMessage {
+  float: none;
+  margin: 0 auto; /* Center the bet message */
+  width: 90%;
+  font-weight: bold;
+  font-size: 10px;
+  text-align: center;
+  color: white;
+}
+
+.messageContent.betMessage.guessRed {
+  background: linear-gradient(0deg, #CA0000 0%, #FF0000 100%);
+}
+
+.messageContent.betMessage.guessBlack {
+  background: linear-gradient(180deg, #000000 0%, #171717 100%);
+}
+
+.messageContent.you {
+  background: linear-gradient(90.02deg, #CDFFBB 0.02%, #00C2FF 224.65%);
 }
 
 .you {
-  align-self: flex-end;
-  background: #00bfff;
-  color: white;
+  float: right;
+  color: black;
 }
 
 .inputArea {
   display: flex;
   padding: 10px;
-  background-color: #f1f1f1;
-  border-top: 1px solid #ccc;
+  background: #EAEAEA;
+  box-shadow: 0 -4px 8px rgba(0,0,0,0.1);
 }
 
 .inputArea input {

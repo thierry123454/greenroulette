@@ -6,11 +6,12 @@ export const GameProvider = ({ children }) => {
   const initialState = {
     stage: null,
     outcome: null,
-    bet: { amount: null, placed: null, choice: null }, // Add bet details
-    exchange: null,
+    bet: { amount: null, placed: null, choice: null },
+    exchange: 1,
     has_visited_bet: false,
     total_red: 0,
-    total_black: 0
+    total_black: 0,
+    userAddress: null,
   };
 
   const [gameState, setGameState] = useState(initialState);

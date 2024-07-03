@@ -58,6 +58,10 @@ function BettingComponent({ web3 }) {
           .then(accounts => {
             if (accounts.length > 0) {
               setUserAddress(accounts[0]);
+              setGameState(prevState => ({
+                ...prevState,
+                userAddress: accounts[0]
+              }));
             }
           });
       } else {
@@ -65,7 +69,7 @@ function BettingComponent({ web3 }) {
       }
     }
     init();
-  }, []);
+  }, [setGameState]);
 
   // Get account details on change
   useEffect(() => {
@@ -73,8 +77,16 @@ function BettingComponent({ web3 }) {
       const handleAccountsChanged = (accounts) => {
         if (accounts.length > 0) {
           setUserAddress(accounts[0]);
+          setGameState(prevState => ({
+            ...prevState,
+            userAddress: accounts[0]
+          }));
         } else {
           setUserAddress('');
+          setGameState(prevState => ({
+            ...prevState,
+            userAddress: ''
+          }));
         }
       };
   
@@ -90,7 +102,7 @@ function BettingComponent({ web3 }) {
   useEffect(() => {
     const timerHandler = (data) => {
       console.log('Timer data received:', data);
-      setGameState(prevState => ({ ...prevState, timer: data.countdown, stage: data.stage, exchange: data.exchange }));
+      setGameState(prevState => ({ ...prevState, timer: data.countdown, stage: data.stage, exchange: data.exchange, total_red: data.total_red, total_black: data.total_black }));
 
       // Check navigation condition immediately after state update
       if (data.stage != 0) {
