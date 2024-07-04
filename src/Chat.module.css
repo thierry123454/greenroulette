@@ -10,6 +10,16 @@
   box-shadow: 0 4px 8px rgba(0,0,0,0.1);
   z-index: 1000;
   overflow: hidden;
+  transition: transform 0.25s ease-in-out;
+}
+
+/* Adjusted styles to control visibility based on state */
+.chatContainer.closed {
+  transform: translateY(120%); /* Pushes the chat off-screen */
+}
+
+.chatContainer.open {
+  transform: translateY(0); /* Brings the chat into view */
 }
 
 #logo {
@@ -80,6 +90,10 @@
   font-weight: 500;
   font-size: 12px;
   color: rgba(255, 255, 255, 0.25);
+}
+
+#logoSmall {
+  width: 80px;
 }
 
 #userInfo {

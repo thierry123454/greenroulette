@@ -11,6 +11,7 @@ import detectEthereumProvider from '@metamask/detect-provider';
 function App() {
   const [web3, setWeb3] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [isChatOpen, setIsChatOpen] = useState(false); // State to control chat visibility
 
   useEffect(() => {
     async function init() {
@@ -32,9 +33,9 @@ function App() {
 
   return (
     <Router>
-        <Chat /> {/* This will render the chat component on every page */}
+        <Chat setIsChatOpen={setIsChatOpen} isChatOpen={isChatOpen} />
         <Routes>
-          <Route path="/" element={<BettingComponent web3={web3} />} />
+          <Route path="/" element={<BettingComponent web3={web3} setIsChatOpen={setIsChatOpen} isChatOpen={isChatOpen}/>} />
           <Route path="/transactions" element={<TransactionComponent />} />
           <Route path="/roulette" element={<RouletteComponent />} />
           <Route path="/outcome" element={<OutcomeComponent />} />

@@ -15,7 +15,7 @@ const contractAddress = "0x2DF14FAF7E0a1E1dc49eAaB612EFFcF19aCB5CFe";
 const socket = io('https://localhost:3001', { secure: true });
 
 
-function BettingComponent({ web3 }) {
+function BettingComponent({ web3, isChatOpen, setIsChatOpen }) {
   const [betAmount, setBetAmount] = useState('');
   const [ethAmount, setEthAmount] = useState('');
 
@@ -156,11 +156,32 @@ function BettingComponent({ web3 }) {
     }
   };
 
+  // Toggle chat visibility
+  const toggleChat = () => {
+    setIsChatOpen(!isChatOpen);
+  };
+
   return (
     <div className={`${commonStyles.container} ${isLoaded ? commonStyles.loaded : ''}`}>
       <div>
         <Logo className={commonStyles.logo} />
       </div>
+      <button onClick={toggleChat} className={`${styles.openChatBtn} ${isChatOpen ? styles.hidden : ''}`}>
+        <svg width="20" height="16" viewBox="0 0 20 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <g clip-path="url(#clip0_45_16)">
+          <path d="M6.50017 11C10.0908 11 13.0002 8.5375 13.0002 5.5C13.0002 2.4625 10.0908 0 6.50017 0C2.90955 0 0.000174167 2.4625 0.000174167 5.5C0.000174167 6.70625 0.459549 7.82187 1.23767 8.73125C1.1283 9.025 0.965799 9.28438 0.793924 9.50313C0.643924 9.69688 0.490799 9.84687 0.378299 9.95C0.322049 10 0.275174 10.0406 0.243924 10.0656C0.228299 10.0781 0.215799 10.0875 0.209549 10.0906L0.203299 10.0969C0.0314242 10.225 -0.0435758 10.45 0.0251742 10.6531C0.0939242 10.8562 0.284549 11 0.500174 11C1.18142 11 1.86892 10.825 2.4408 10.6094C2.7283 10.5 2.99705 10.3781 3.23142 10.2531C4.1908 10.7281 5.30642 11 6.50017 11ZM14.0002 5.5C14.0002 9.00938 10.9033 11.6531 7.23455 11.9688C7.99392 14.2938 10.5127 16 13.5002 16C14.6939 16 15.8095 15.7281 16.772 15.2531C17.0064 15.3781 17.272 15.5 17.5595 15.6094C18.1314 15.825 18.8189 16 19.5002 16C19.7158 16 19.9095 15.8594 19.9752 15.6531C20.0408 15.4469 19.9689 15.2219 19.7939 15.0938L19.7877 15.0875C19.7814 15.0812 19.7689 15.075 19.7533 15.0625C19.722 15.0375 19.6752 15 19.6189 14.9469C19.5064 14.8437 19.3533 14.6937 19.2033 14.5C19.0314 14.2812 18.8689 14.0187 18.7595 13.7281C19.5377 12.8219 19.997 11.7062 19.997 10.4969C19.997 7.59687 17.3439 5.21875 13.9783 5.0125C13.9908 5.17187 13.997 5.33437 13.997 5.49687L14.0002 5.5Z" fill="url(#paint0_linear_45_16)"/>
+          </g>
+          <defs>
+          <linearGradient id="paint0_linear_45_16" x1="9.99949" y1="0" x2="9.99949" y2="16" gradientUnits="userSpaceOnUse">
+          <stop stop-color="#00A4D8"/>
+          <stop offset="1" stop-color="#B8E3A9"/>
+          </linearGradient>
+          <clipPath id="clip0_45_16">
+          <rect width="20" height="16" fill="white"/>
+          </clipPath>
+          </defs>
+        </svg>
+      </button>
       <div className={commonStyles.content}>
         <div className={`${commonStyles.info} ${styles.info} ${specialStyle ? styles.special : ''}`}>
           <div className={commonStyles.status}>

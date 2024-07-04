@@ -3,6 +3,7 @@ const fs = require('fs');
 const express = require('express');
 const socketIo = require('socket.io');
 const { Web3 } = require('web3');
+const ethers = require('ethers');
 
 // Load ABIs
 const abi_random = require('./randomContractAbi.json');
@@ -29,15 +30,15 @@ const infuraUrl = process.env.INFURA_URL;
 const privateKey = process.env.PRIVATE_KEY_HOUSE;
 const rouletteContractAddress = "0x2DF14FAF7E0a1E1dc49eAaB612EFFcF19aCB5CFe";
 
-// Random Number Contract
-const flareRpcUrl = 'https://flare.solidifi.app/ext/C/rpc';
-const provider_flare = new Web3(flareRpcUrl);
-const randomContractAddress = "0x1000000000000000000000000000000000000003";
+// Define constants for the Flare network
+const FLARE_CONTRACTS = "@flarenetwork/flare-periphery-contract-artifacts";
+const FLARE_RPC = "https://coston-api.flare.network/ext/C/rpc";
+const FLARE_CONTRACT_REGISTRY_ADDR = "0xaD67FE66660Fb8dFE9d6b1b4240d8650e30F6019";
 
 const web3 = new Web3(infuraUrl);
 const account = web3.eth.accounts.privateKeyToAccount(privateKey);
 web3.eth.accounts.wallet.add(account);
-const randomContract = new provider_flare.eth.Contract(abi_random, randomContractAddress);
+
 const rouletteContract = new web3.eth.Contract(abi_roulette, rouletteContractAddress);
 
 let stageOneTimer = 100;
@@ -121,7 +122,8 @@ async function checkNewBets() {
     const message = {
       user: bettor,
       betAmount: ethAmount,
-      betChoice: guess
+      betChoice: guess,
+      betExchange: currentEthPrice
     };
 
     // Emit the special bet message to all connected clients
@@ -186,13 +188,15 @@ async function fetchRandomNumberUntilChange() {
     const currentRandomNumber = await fetchRandomNumber();
     console.log("Last random number:", lastRandomNumber)
     console.log("Current random number:", currentRandomNumber)
-    if (lastRandomNumber === null || lastRandomNumber == currentRandomNumber) {
+
+    if (currentRandomNumber == null || lastRandomNumber === null || lastRandomNumber == currentRandomNumber) {
       lastRandomNumber = currentRandomNumber;
       setTimeout(fetchRandomNumberUntilChange, 5000); // Fetch every 5 seconds
     } else {
       // Numbers have changed, proceed to stage 3
-      prepareForPayout(currentRandomNumber);
+      prepareForPayout(Number(currentRandomNumber % BigInt(37)));
     }
+  
     emitInfo(-1, 2);
   } catch (error) {
     console.error('Error fetching random number:', error);
@@ -260,9 +264,38 @@ async function payoutWinners(outcome) {
 }
 
 async function fetchRandomNumber() {
-  const randomBigNumber = await randomContract.methods.getCurrentRandom().call();
-  const randomNumber = Number(randomBigNumber % BigInt(37));
-  return randomNumber;
+    // 1. Import Dependencies
+    const ethers = await import("ethers");
+    const flare = await import(FLARE_CONTRACTS);
+    const provider = new ethers.JsonRpcProvider(FLARE_RPC);
+  
+    // 2. Access the Contract Registry
+    const flareContractRegistry = new ethers.Contract(
+      FLARE_CONTRACT_REGISTRY_ADDR,
+      flare.nameToAbi("FlareContractRegistry", "coston").data,
+      provider
+    );
+  
+    // 3. Retrieve the Relay Contract
+    const relayAddress = await flareContractRegistry.getContractAddressByName(
+      "Relay"
+    );
+    const relay = new ethers.Contract(
+      relayAddress,
+      flare.nameToAbi("IRelay", "coston").data,
+      provider
+    );
+  
+    // 4. Get the Random Number
+    const [randomBigNumber, isSecure, timestamp] = await relay.getRandomNumber();
+    console.log("Random Number is", randomBigNumber);
+    console.log("Is it secure", isSecure);
+    console.log("Creation timestamp is", timestamp);
+
+    if (isSecure)
+      return randomBigNumber;
+
+    return null;
 }
 
 // Start the initial stage as soon as the server starts

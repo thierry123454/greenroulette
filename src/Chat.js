@@ -4,6 +4,7 @@ import styles from './Chat.module.css';
 import { ReactComponent as GRChat } from './images/gr_chat.svg'
 import { ReactComponent as Send } from './images/send.svg'
 import { GameContext } from './GameContext';
+import logo from './images/logo.svg';
 
 const socket = io('http://localhost:3002');
 const timer = io('https://localhost:3001', { secure: true });
@@ -16,7 +17,7 @@ const roundTwoDecimals = (number) => {
   return Math.round((number + Number.EPSILON) * 100) / 100
 };
 
-function Chat() {
+function Chat({ setIsChatOpen, isChatOpen }) {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
   const { gameState } = useContext(GameContext);
@@ -39,7 +40,7 @@ function Chat() {
       const timerHandler = (message) => {
         // Format the special message for display
         const specialMessage = {
-          text: ` just put ${roundTwoDecimals(message.betAmount * exchange)} USD on ${message.betChoice === 0 ? "Red" : "Black"}!`,
+          text: ` just put ${roundTwoDecimals(message.betAmount * message.betExchange)} USD on ${message.betChoice === 0 ? "Red" : "Black"}!`,
           user: message.user,
           type: 'bet',
           incomingBetChoice: message.betChoice
@@ -80,11 +81,15 @@ function Chat() {
     }
   };
 
+  const handleCloseChat = () => {
+    setIsChatOpen(false);
+  };
+
   return (
-    <div className={styles.chatContainer}>
+    <div className={`${styles.chatContainer} ${isChatOpen ? styles.open : styles.closed}`}>
       <div className={styles.chatHeader}>
         <GRChat id={styles.logo} />
-        <span id={styles.x}>✕</span>
+        <span id={styles.x} onClick={handleCloseChat}>✕</span>
       </div>
       <div className={styles.chatTotalBets}>
         <div className={styles.totalRed}>
@@ -99,6 +104,29 @@ function Chat() {
         </div>
       </div>
       <div className={styles.messages} ref={messagesEndRef}>
+        <div key={-1} className={`${styles.message}`}>
+          <span id={styles.userInfo}>
+          <img  src={logo} id={styles.logoSmall} alt="GreenRoulette"/>
+          </span>
+          <br />
+          <div className={styles.messageContent}>
+            Welcome to GreenRoulette Chat! 🌍💬
+            {isChatOpen}
+            <br />
+            <br />
+            We’re thrilled to have you here. Get ready to connect with other players in real-time! Before you dive into chatting, here are a few rules to keep in mind:
+            <br />
+            <ul>
+              <li>Be Respectful: Treat everyone with respect. Abusive language, harassment, and discrimination are not tolerated.</li>
+              <li>Stay on Topic: Please keep conversations relevant to the game and betting.</li>
+              <li>No Spamming: Avoid repetitive messages and flooding the chat. Let everyone have a chance to speak.</li>
+              <li>Privacy Matters: Don’t share personal information or ask for others' personal details.</li>
+              <li>Remember, violating these rules can lead to a timeout or ban from chat. Let’s create a positive and enjoyable environment for everyone!</li>
+            </ul>
+            Happy Chatting! 🚀
+          </div>
+        </div>
+
         {messages.map((msg, index) => (
           <div key={index} className={`${styles.message} ${msg.user === userAddress ? styles.you : ''}`}>
             {
