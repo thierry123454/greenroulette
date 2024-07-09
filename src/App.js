@@ -4,6 +4,7 @@ import BettingComponent from './BettingComponent';
 import TransactionComponent from './TransactionComponent';
 import RouletteComponent from './RouletteComponent';
 import OutcomeComponent from './OutcomeComponent';
+import LandingPage from './LandingPage'; // Import the new component
 import Chat from './Chat'; // Import the chat component
 import Web3 from 'web3';
 import detectEthereumProvider from '@metamask/detect-provider';
@@ -35,7 +36,8 @@ function App() {
     <Router>
         <Chat setIsChatOpen={setIsChatOpen} isChatOpen={isChatOpen} />
         <Routes>
-          <Route path="/" element={<BettingComponent web3={web3} setIsChatOpen={setIsChatOpen} isChatOpen={isChatOpen}/>} />
+          <Route path="/" element={<LandingPage />} /> {/* Set LandingPage as the default */}
+          <Route path="/betting" element={<BettingComponent web3={web3} setIsChatOpen={setIsChatOpen} isChatOpen={isChatOpen}/>} />
           <Route path="/transactions" element={<TransactionComponent />} />
           <Route path="/roulette" element={<RouletteComponent />} />
           <Route path="/outcome" element={<OutcomeComponent />} />

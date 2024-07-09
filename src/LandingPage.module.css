@@ -1,0 +1,244 @@
+/* LandingPage.module.css */
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  padding: 0;
+  overflow: scroll;
+}
+
+html, body {
+  height: 100%;
+  margin: 0;
+  overflow-x: hidden; /* Disables horizontal scrolling */
+  overflow-y: auto; /* Enables vertical scrolling */
+}
+
+.page1 {
+  width: 100%;
+  height: 100vh;
+  background: linear-gradient(180deg, #CDFFBB 0%, #FFDA7A 100%);
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.25);
+}
+
+.header {
+  display: flex;
+  align-items: center; /* Aligns items vertically in the center */
+  justify-content: space-between; /* Puts maximum space between flex items */
+  padding: 10px; /* Add padding for better spacing around items */
+}
+
+.buttonGroup {
+  display: flex; /* Aligns buttons in a row */
+}
+
+.header button {
+  background: rgba(205, 255, 187, 0.01);
+  box-shadow: 1px 1px 5px rgba(0, 0, 0, 0.25);
+  border-radius: 10px;
+
+  margin-top: 10px;
+
+  margin-left: 10px; /* Spacing between buttons */
+  padding: 8px 16px; /* Padding inside buttons */
+  border: none; /* Remove default border */
+  border-radius: 4px; /* Rounded corners */
+  cursor: pointer; /* Cursor indicates button */
+
+  /* Small text */
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 500;
+  font-size: 18px;
+  line-height: 150%;
+  /* identical to box height, or 24px */
+  display: flex;
+  align-items: center;
+
+  color: #FFFFFF;
+  -webkit-text-stroke: 0.5px black;
+}
+
+.main {
+  display: flex;
+  align-items: center; /* Aligns items vertically in the center */
+  justify-content: space-between; /* Puts maximum space between flex items */
+  padding: 10px; /* Add padding for better spacing around items */
+}
+
+.info {
+  margin-left: 100px;
+  margin-top: 100px;
+  height: 450px;
+}
+
+.slogan {
+  font-style: normal;
+  font-weight: 800;
+  font-size: 60px;
+  line-height: 150%;
+
+  color: #CDFFBB;
+  -webkit-text-stroke: 1px #000000;
+  text-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
+
+  margin: 0;
+}
+
+#distinguish {
+  background: linear-gradient(180deg, #00C2FF 0%, #CDFFBB 100%);
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  -webkit-text-stroke: 1px #FFFFFF;
+  text-shadow: none;
+  filter: drop-shadow(0px 4px 4px rgba(0, 0, 0, 0.25));
+}
+
+.infoText {
+  width: 90%;
+
+  font-style: normal;
+  font-weight: 300;
+  font-size: 24px;
+  line-height: 150%;
+
+  color: #000000;
+
+  text-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
+}
+
+.donationAmount {
+  font-style: normal;
+  font-weight: 700;
+  font-size: 26px;
+  line-height: 150%;
+
+  background: linear-gradient(90deg, #CDFFBB 0%, #00C2FF 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-fill-color: transparent;
+
+  -webkit-text-stroke: 1px #000000;
+  filter: drop-shadow(-1px 0px 0px rgba(0, 0, 0, 1))
+          drop-shadow(0px 4px 4px rgba(0, 0, 0, 0.25));
+  text-shadow: none;
+}
+
+#layer {
+  position: relative;
+  top: 0px;
+  left: -78px;
+}
+
+#startPlaying {
+  padding: 8px 16px;
+  margin-top: 20px;
+
+  background: linear-gradient(180deg, #CDFFBB 0%, #00C2FF 100%);
+  box-shadow: 1px 1px 5px rgba(0, 0, 0, 0.25);
+  border-radius: 10px;
+
+  font-style: normal;
+  font-weight: 800;
+  font-size: 20px;
+  line-height: 150%;
+
+  color: #FFFFFF;
+
+  -webkit-text-stroke: 1px #000000;
+
+  border: none;
+
+  transition: color 0.3s ease;
+  transition: -webkit-text-stroke 0.3s ease;
+}
+
+#startPlaying:hover{
+  color: #000000;
+  -webkit-text-stroke: 1px #FFFFFF;
+}
+
+.visual {
+  position: relative;
+  height: 500px;
+  width: 100%;
+}
+
+.elements {
+  position: relative;
+  top: 60%; 
+  left: 50%; 
+  transform: translate(-50%, -50%);
+  width: 500px;
+  height: 500px;
+}
+
+.backCoin, .middleCoin, .frontCoin, .hearts {
+  position: absolute;
+}
+
+.earth {
+  width: 500px;
+  height: 500px;
+}
+
+.backCoin {
+  left: 240px;
+  top: 80px;
+  z-index: -1;
+  animation: waveBackCoin 4s ease-in-out infinite;
+}
+
+.middleCoin {
+  left: 280px;
+  top: 80px;
+  animation: waveMiddleCoin 4s ease-in-out infinite;
+}
+
+.frontCoin {
+  left: 310px;
+  top: 90px;
+  animation: waveFrontCoin 4s ease-in-out infinite;
+}
+
+.hearts {
+  left: 40px;
+  bottom: 40px;
+  animation: floatHearts 4s ease-in-out infinite;
+}
+
+button {
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+button:hover {
+  background-color: #82C0B9;
+}
+
+
+@keyframes floatHearts {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+@keyframes waveBackCoin {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-25px); }
+}
+
+@keyframes waveMiddleCoin {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-20px); }
+}
+
+@keyframes waveFrontCoin {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
