@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import styles from './CountdownCircle.module.css';
 
-function CountdownCircle({ duration }) {
+function CountdownCircle({ duration, onReset }) {
   const [percent, setPercent] = useState(100);
   const [animationPhase, setAnimationPhase] = useState('countdown');
 
@@ -33,6 +33,7 @@ function CountdownCircle({ duration }) {
       const countdownReset = setTimeout(() => {
         console.log('Resetting timer!');
         setPercent(100);
+        onReset();
       }, initialWait + duration + 1000);
       timeoutIds.push(countdownReset);
 
