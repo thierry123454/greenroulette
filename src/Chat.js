@@ -1,6 +1,9 @@
 import React, { useState, useEffect, useContext, useRef } from 'react';
 import io from 'socket.io-client';
+
 import styles from './Chat.module.css';
+import commonStyles from './CommonStyles.module.css'
+
 import { ReactComponent as GRChat } from './images/gr_chat.svg'
 import { ReactComponent as Send } from './images/send.svg'
 import { GameContext } from './GameContext';
@@ -86,10 +89,10 @@ function Chat({ setIsChatOpen, isChatOpen }) {
   };
 
   return (
-    <div className={`${styles.chatContainer} ${isChatOpen ? styles.open : styles.closed}`}>
-      <div className={styles.chatHeader}>
+    <div className={`${commonStyles.popUpContainer} ${styles.chatContainer} ${isChatOpen ? styles.open : styles.closed}`}>
+      <div className={`${commonStyles.popUpHeader} ${styles.chatHeader}`}>
         <GRChat id={styles.logo} />
-        <span id={styles.x} onClick={handleCloseChat}>✕</span>
+        <span id={commonStyles.x} onClick={handleCloseChat}>✕</span>
       </div>
       <div className={styles.chatTotalBets}>
         <div className={styles.totalRed}>

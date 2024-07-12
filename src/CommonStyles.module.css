@@ -123,3 +123,33 @@ body {
 
   -webkit-text-stroke: 0.25px #000000;
 }
+
+/* CHAT COMPONENT */
+.popUpContainer {
+  display: flex;
+  flex-direction: column;
+  border-radius: 12px;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+  overflow: hidden;
+  transition: transform 0.25s ease-in-out;
+}
+
+#x {
+  cursor: pointer;
+  font-style: normal;
+  font-weight: 500;
+  font-size: 25px;
+  line-height: 150%;
+  text-shadow: 0px 0px 4px rgba(0, 0, 0, 0.25);
+}
+
+.popUpHeader {
+  color: white;
+  padding: 5px 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-weight: bold;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5); /* Horizontal offset, vertical offset, blur radius, color */
+  overflow: visible;
+}

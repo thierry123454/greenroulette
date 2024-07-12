@@ -10,8 +10,7 @@ CREATE TABLE players (
 
 CREATE TABLE donations (
     donation_id INT AUTO_INCREMENT PRIMARY KEY,
-    user_address VARCHAR(255),
+    user_address VARCHAR(255) NULL,
     donation_date DATE NOT NULL,
-    donation_amount DECIMAL(18, 8) NOT NULL,
-    CONSTRAINT fk_user_address FOREIGN KEY (user_address) REFERENCES players(address)
+    donation_amount DECIMAL(18, 8) NOT NULL
 );

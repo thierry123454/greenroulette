@@ -1,7 +1,7 @@
 // LandingPage.js
 import React, { useEffect, useState, useCallback, useRef } from 'react';
 import styles from './LandingPage.module.css'; // Import CSS module for styles
-import commonStyles from './CommonStyles.module.css'; // Import CSS module for styles
+import { useNavigate } from 'react-router-dom';
 import { ReactComponent as Logo } from './images/logo.svg';
 import { ReactComponent as BackCoin } from './images/landing_visual/Back_Coin.svg';
 import { ReactComponent as Earth } from './images/landing_visual/Earth.svg';
@@ -23,6 +23,8 @@ import CountdownCircle from './CountdownCircle';
 
 function LandingPage() {
   const [animate, setAnimate] = useState(false);
+
+  const navigate = useNavigate();
 
   const allCharities = [
     { logo: STCLogo, alt: 'Charity Logo', fontSize: '16px', black: true, description: 'Save the Children is passionately committed to one goal: Giving all children the best chance for the future they deserve – a healthy start in life, to be protected from harm and the opportunity to learn. Every day, in times of crisis, here in the U.S. and in more than 110 countries around the world, they do whatever it takes to reach the most vulnerable children and their families. ' },
@@ -80,7 +82,7 @@ function LandingPage() {
               charities. With <span className={styles.donationAmount}>$12491</span> already donated, join us in our mission to give 
               back. Ready to place your bets?
             </p>
-            <button id={styles.startPlaying} onClick={() => {}}>Start Playing 🚀</button>
+            <button id={styles.startPlaying} onClick={() => {navigate('/getting-started')}}>Start Playing 🚀</button>
           </div>
           <div className={styles.visual}>
             <div className={styles.elements}>

@@ -4,13 +4,7 @@
   right: 20px;
   width: 300px;
   height: 400px;
-  display: flex;
-  flex-direction: column;
-  border-radius: 12px;
-  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
   z-index: 1000;
-  overflow: hidden;
-  transition: transform 0.25s ease-in-out;
 }
 
 /* Adjusted styles to control visibility based on state */
@@ -29,26 +23,9 @@
   top: -3px;
 }
 
-#x {
-  cursor: pointer;
-  font-style: normal;
-  font-weight: 500;
-  font-size: 25px;
-  line-height: 150%;
-  text-shadow: 0px 0px 4px rgba(0, 0, 0, 0.25);
-}
-
 .chatHeader {
   background-color: #00C2FF;
-  color: white;
-  padding: 5px 10px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  font-weight: bold;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5); /* Horizontal offset, vertical offset, blur radius, color */
   z-index: 1000;
-  overflow: visible;
 }
 
 .chatTotalBets {
@@ -101,9 +78,9 @@
 }
 
 .messages {
+  height: 250px;
   flex-grow: 1;
   padding: 0px;
-  height: 250px;
   overflow-y: auto;
   overflow-x: hidden;
   background: #EAEAEA;
