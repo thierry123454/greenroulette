@@ -73,28 +73,100 @@ app.post('/api/update-username', (req, res) => {
 });
 
 app.post('/api/donations', (req, res) => {
-  const { userAddress, donationAmount, donationDate } = req.body;
-  const sql = `
+  const { userAddress, donationAmountUSD, donationAmountETH, donationDate } = req.body;
+
+  const donationInsertSql = `
     INSERT INTO donations (user_address, donation_amount, donation_date) 
     VALUES (?, ?, ?);
   `;
 
-  let sanitizedAmount = validateAndSanitizeInput(donationAmount);
+  const playerUpdateSql = `
+    UPDATE players 
+    SET total_donated = total_donated + ? 
+    WHERE address = ?;
+  `;
+
+  let sanitizedAmountUSD = validateAndSanitizeInput(donationAmountUSD);
+  let sanitizedAmountETH = validateAndSanitizeInput(donationAmountETH);
   
-  if (!sanitizedAmount) {
-    sanitizedAmount = null;
+  if (!sanitizedAmountUSD) {
+    return res.status(400).send('Invalid donation amount');
   }
 
-  pool.query(sql, [userAddress, sanitizedAmount, donationDate], (err, result) => {
+  if (!sanitizedAmountETH) {
+    return res.status(400).send('Invalid donation amount');
+  }
+
+  pool.getConnection((err, connection) => {
     if (err) {
-      console.error('Error inserting donation:', err);
-      res.status(500).send('Error recording donation');
-    } else {
-      res.send('Donation recorded successfully');
+      console.error('Error getting connection:', err);
+      return res.status(500).send('Database connection error');
     }
+
+    connection.beginTransaction(err => {
+      if (err) {
+        console.error('Error beginning transaction:', err);
+        return res.status(500).send('Database transaction error');
+      }
+
+      connection.query(donationInsertSql, [userAddress || null, sanitizedAmountUSD, donationDate], (err, result) => {
+        if (err) {
+          return connection.rollback(() => {
+            console.error('Error inserting donation:', err);
+            res.status(500).send('Error recording donation');
+          });
+        }
+
+        // Only proceed with updating the player's total_donated if userAddress is provided
+        if (userAddress) {
+          connection.query(playerUpdateSql, [sanitizedAmountETH, userAddress], (err, result) => {
+            if (err) {
+              return connection.rollback(() => {
+                console.error('Error updating player total donated:', err);
+                res.status(500).send('Error updating total donated');
+              });
+            }
+
+            connection.commit(err => {
+              if (err) {
+                return connection.rollback(() => {
+                  console.error('Error committing transaction:', err);
+                  res.status(500).send('Transaction commit error');
+                });
+              }
+
+              res.send('Donation recorded and total donated updated successfully');
+            });
+          });
+        } else {
+          // Commit transaction if no user address to update
+          connection.commit(err => {
+            if (err) {
+              return connection.rollback(() => {
+                console.error('Error committing transaction:', err);
+                res.status(500).send('Transaction commit error');
+              });
+            }
+
+            res.send('Anonymous donation recorded successfully');
+          });
+        }
+      });
+    });
   });
 });
 
+app.get('/api/get_donations', (req, res) => {
+  const sql = `SELECT donation_date, user_address, donation_amount FROM donations ORDER BY donation_date DESC LIMIT 10`;
+  pool.query(sql, (err, results) => {
+    if (err) {
+      console.error('Error fetching donations:', err);
+      res.status(500).send('Error fetching donations');
+    } else {
+      res.json(results);
+    }
+  });
+});
 
 // Start the server
 app.listen(port, () => {
