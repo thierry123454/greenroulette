@@ -1,6 +1,7 @@
 // LandingPage.js
 import React, { useEffect, useState, useCallback, useRef } from 'react';
 import styles from './LandingPage.module.css'; // Import CSS module for styles
+import commonStyles from './CommonStyles.module.css'; // Import CSS module for styles
 import { useNavigate } from 'react-router-dom';
 import { ReactComponent as Logo } from './images/logo.svg';
 import { ReactComponent as BackCoin } from './images/landing_visual/Back_Coin.svg';
@@ -8,6 +9,9 @@ import { ReactComponent as Earth } from './images/landing_visual/Earth.svg';
 import { ReactComponent as MiddleCoin } from './images/landing_visual/Middle_Coin.svg';
 import { ReactComponent as FrontCoin } from './images/landing_visual/Front_Coin.svg';
 import { ReactComponent as Hearts } from './images/landing_visual/Hearts.svg';
+import { ReactComponent as Medal1 } from './images/Medal.svg';
+import { ReactComponent as Medal2 } from './images/Medal_2.svg';
+import { ReactComponent as Medal3 } from './images/Medal_3.svg';
 
 import GDLogo from './images/givedirectly_logo.png';
 import STCLogo from './images/save_the_children_logo.png';
@@ -110,7 +114,182 @@ function LandingPage() {
           <FrontCoin className={styles.frontCoin2}/>
           <Hearts className={styles.hearts2}/>
         </div>
-    </div>
+      </div>
+      <div className={styles.page3}>
+        <h1 className={styles.charityHeader}>And all of this would not be possible without our players.</h1>
+        <div className={styles.leaderboards}>
+          <div className={`${commonStyles.popUpContainer} ${styles.leaderboard}`}>
+              <div className={`${commonStyles.popUpHeader} ${styles.leaderboardHeader}`}>
+                <span className={styles.leaderboardHeaderText}>Top Donators 🌍</span>
+              </div>
+              <div className={styles.topEntry}>
+                <Medal1 className={styles.medal} />
+                <div className={styles.entryInfo}>
+                  <span className={styles.entryAddress}>
+                    0x1A3F...1D83
+                  </span>
+                  <br />
+                  <span className={`${styles.entryAmount} ${styles.top}`}>
+                    12385.21$
+                  </span>
+                </div>
+              </div>
+              <div className={styles.topEntry}>
+                <Medal2 className={styles.medal2} />
+                <div className={styles.entryInfo}>
+                  <span className={styles.entryAddress2}>
+                    0x1A3F...1D83
+                  </span>
+                  <br />
+                  <span className={styles.entryAmount}>
+                    12385.21$
+                  </span>
+                </div>
+              </div>
+
+              <div className={styles.topEntry}>
+                <Medal3 className={styles.medal2} />
+                <div className={styles.entryInfo}>
+                  <span className={styles.entryAddress2}>
+                    0x1A3F...1D83
+                  </span>
+                  <br />
+                  <span className={styles.entryAmount}>
+                    12385.21$
+                  </span>
+                </div>
+              </div>
+              
+              <div className={styles.regularEntries}>
+                <div className={`${commonStyles.entry} ${styles.entry}`}>
+                    <span>
+                      4. 0x8AB2...2847
+                    </span>
+                    <span className={commonStyles.entryAmount}>
+                      12$
+                    </span>
+                </div>
+
+                <div className={`${commonStyles.entry} ${styles.entry}`}>
+                    <span>
+                      4. 0x8AB2...2847
+                    </span>
+                    <span className={commonStyles.entryAmount}>
+                      12$
+                    </span>
+                </div>
+
+                <div className={`${commonStyles.entry} ${styles.entry}`}>
+                    <span>
+                      4. 0x8AB2...2847
+                    </span>
+                    <span className={commonStyles.entryAmount}>
+                      12$
+                    </span>
+                </div>
+
+                <div className={`${commonStyles.entry} ${styles.entry}`}>
+                    <span>
+                      4. 0x8AB2...2847
+                    </span>
+                    <span className={commonStyles.entryAmount}>
+                      12$
+                    </span>
+                </div>
+
+                <div className={`${commonStyles.entry} ${styles.entry}`}>
+                    <span>
+                      4. 0x8AB2...2847
+                    </span>
+                    <span className={commonStyles.entryAmount}>
+                      12$
+                    </span>
+                </div>
+
+                <div className={`${commonStyles.entry} ${styles.entry}`}>
+                    <span>
+                      4. 0x8AB2...2847
+                    </span>
+                    <span className={commonStyles.entryAmount}>
+                      12$
+                    </span>
+                </div>
+
+                <div className={`${commonStyles.entry} ${styles.entry}`}>
+                    <span>
+                      4. 0x8AB2...2847
+                    </span>
+                    <span className={commonStyles.entryAmount}>
+                      12$
+                    </span>
+                </div>
+
+                <div className={`${commonStyles.entry} ${styles.entry}`}>
+                    <span>
+                      4. 0x8AB2...2847
+                    </span>
+                    <span className={commonStyles.entryAmount}>
+                      12$
+                    </span>
+                </div>
+
+                <div className={`${commonStyles.entry} ${styles.entry}`}>
+                    <span>
+                      4. 0x8AB2...2847
+                    </span>
+                    <span className={commonStyles.entryAmount}>
+                      12$
+                    </span>
+                </div>
+
+                <div className={`${commonStyles.entry} ${styles.entry}`}>
+                    <span>
+                      4. 0x8AB2...2847
+                    </span>
+                    <span className={commonStyles.entryAmount}>
+                      12$
+                    </span>
+                </div>
+
+                <div className={`${commonStyles.entry} ${styles.entry}`}>
+                    <span>
+                      4. 0x8AB2...2847
+                    </span>
+                    <span className={commonStyles.entryAmount}>
+                      12$
+                    </span>
+                </div>
+
+                <div className={`${commonStyles.entry} ${styles.entry}`}>
+                    <span>
+                      4. 0x8AB2...2847
+                    </span>
+                    <span className={commonStyles.entryAmount}>
+                      12$
+                    </span>
+                </div>
+
+                <div className={`${commonStyles.entry} ${styles.entry}`}>
+                    <span>
+                      4. 0x8AB2...2847
+                    </span>
+                    <span className={commonStyles.entryAmount}>
+                      12$
+                    </span>
+                </div>
+
+                <div className={`${commonStyles.entry} ${styles.entry}`}>
+                    <span>
+                      4. 0x8AB2...2847
+                    </span>
+                    <span className={commonStyles.entryAmount}>
+                      12$
+                    </span>
+                </div>
+              </div>
+          </div>
+        </div>
+      </div>
     </>
   );
 }

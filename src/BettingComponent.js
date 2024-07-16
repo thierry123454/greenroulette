@@ -345,11 +345,11 @@ function BettingComponent({ web3, isChatOpen, setIsChatOpen, userAddress }) {
                     <React.Fragment key={date}>
                       <span className={commonStyles.label}>{date}</span>
                       {donations.map((donation, index) => (
-                        <div key={index} className={styles.donation}>
-                          <span className={styles.donationAddress}>
+                        <div key={index} className={commonStyles.entry}>
+                          <span>
                             {donation.user_address ? donation.user_address.substring(0, 6) + '...' + donation.user_address.substring(donation.user_address.length - 4) : 'Anonymous'}
                           </span>
-                          <span className={styles.donationAmount}>
+                          <span className={commonStyles.entryAmount}>
                             ${parseFloat(donation.donation_amount).toFixed(2)}
                           </span>
                         </div>
