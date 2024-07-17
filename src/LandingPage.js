@@ -13,6 +13,8 @@ import { ReactComponent as Medal1 } from './images/Medal.svg';
 import { ReactComponent as Medal2 } from './images/Medal_2.svg';
 import { ReactComponent as Medal3 } from './images/Medal_3.svg';
 
+import axios from 'axios';
+
 import GDLogo from './images/givedirectly_logo.png';
 import STCLogo from './images/save_the_children_logo.png';
 import ODALogo from './images/oda_logo.png';
@@ -20,10 +22,16 @@ import PFLogo from './images/pathforward_logo.png';
 import TFTFLogo from './images/trees_for_the_future_logo.png';
 import ZFLogo from './images/zerofoodprint_logo.jpeg';
 import AFWLogo from './images/acts_for_water_logo.png';
+import ethereumLogo from './images/ethereum_logo.png';
 
 import Card from './Card';
 
 import CountdownCircle from './CountdownCircle';
+
+// Create an instance of axios with a base URL
+const database_api = axios.create({
+  baseURL: 'http://localhost:6969/'
+});
 
 function LandingPage() {
   const [animate, setAnimate] = useState(false);
@@ -66,6 +74,51 @@ function LandingPage() {
     return () => clearTimeout(timeout);
   }, [animate]);
 
+  const [topDonators, setTopDonators] = useState([]);
+
+  useEffect(() => {
+    const fetchTopDonators = async () => {
+      try {
+        const response = await database_api.get('/api/top-donators');
+        setTopDonators(response.data);
+      } catch (error) {
+        console.error('Failed to fetch top donators:', error);
+      }
+    };
+
+    fetchTopDonators();
+  }, []);
+
+  const [topWinners, setTopWinners] = useState([]);
+
+  useEffect(() => {
+    const fetchTopWinners = async () => {
+      try {
+        const response = await database_api.get('/api/top-winners');
+        setTopWinners(response.data);
+      } catch (error) {
+        console.error('Failed to fetch top winners:', error);
+      }
+    };
+
+    fetchTopWinners();
+  }, []);
+
+  const [totalDonated, setTotalDonated] = useState(0);
+
+  useEffect(() => {
+    const fetchTotalDonated = async () => {
+      try {
+        const response = await database_api.get('/api/total_donated');
+        setTotalDonated(response.data[0].total_amount);
+      } catch (error) {
+        console.error('Failed to fetch total donated:', error);
+      }
+    };
+
+    fetchTotalDonated();
+  }, []);
+
   return (
     <>
       <div className={styles.page1}>
@@ -83,7 +136,7 @@ function LandingPage() {
               Welcome to GreenRoulette, where every spin is a chance to win and 
               an opportunity to help. At GreenRoulette, we believe in entertainment 
               that cares. That's why we commit <b>75%</b> of all profits to support various 
-              charities. With <span className={styles.donationAmount}>$12491</span> already donated, join us in our mission to give 
+              charities. With <span className={styles.donationAmount}>${parseFloat(totalDonated)}</span> already donated, join us in our mission to give 
               back. Ready to place your bets?
             </p>
             <button id={styles.startPlaying} onClick={() => {navigate('/getting-started')}}>Start Playing 🚀</button>
@@ -122,170 +175,101 @@ function LandingPage() {
               <div className={`${commonStyles.popUpHeader} ${styles.leaderboardHeader}`}>
                 <span className={styles.leaderboardHeaderText}>Top Donators 🌍</span>
               </div>
-              <div className={styles.topEntry}>
-                <Medal1 className={styles.medal} />
-                <div className={styles.entryInfo}>
-                  <span className={styles.entryAddress}>
-                    0x1A3F...1D83
-                  </span>
-                  <br />
-                  <span className={`${styles.entryAmount} ${styles.top}`}>
-                    12385.21$
-                  </span>
-                </div>
-              </div>
-              <div className={styles.topEntry}>
-                <Medal2 className={styles.medal2} />
-                <div className={styles.entryInfo}>
-                  <span className={styles.entryAddress2}>
-                    0x1A3F...1D83
-                  </span>
-                  <br />
-                  <span className={styles.entryAmount}>
-                    12385.21$
-                  </span>
-                </div>
-              </div>
 
-              <div className={styles.topEntry}>
-                <Medal3 className={styles.medal2} />
-                <div className={styles.entryInfo}>
-                  <span className={styles.entryAddress2}>
-                    0x1A3F...1D83
-                  </span>
-                  <br />
-                  <span className={styles.entryAmount}>
-                    12385.21$
-                  </span>
-                </div>
-              </div>
-              
+              {topDonators.map((donator, index) => (
+                <>
+                  {index <= 2 &&
+                    <div className={styles.topEntry}>
+                      {index === 0 ? <Medal1 className={styles.medal} /> :
+                      index === 1 ? <Medal2 className={styles.medal} /> :
+                      index === 2 ? <Medal3 className={styles.medal} /> : null}
+                      <div className={styles.entryInfo}>
+                        <span className={styles.entryAddress}>
+                          {donator.username ? donator.username : 
+                          (donator.address.substring(0, 6) + '...' + donator.address.substring(donator.address.length - 4))}
+                        </span>
+                        <br />
+                        <span className={`${styles.entryAmount} ${index == 0 && styles.top}`}>
+                          {parseFloat(donator.total_donated)}
+                          <img src={ethereumLogo} alt="ETH" className={styles.ethLogo} />
+                        </span>
+                      </div>
+                    </div>
+                  }
+                </>
+              ))}
+
               <div className={styles.regularEntries}>
-                <div className={`${commonStyles.entry} ${styles.entry}`}>
-                    <span>
-                      4. 0x8AB2...2847
-                    </span>
-                    <span className={commonStyles.entryAmount}>
-                      12$
-                    </span>
-                </div>
+              {topDonators.map((donator, index) => (
+                <>
+                {
+                  index > 2 &&
+                  <>
+                    <div className={`${commonStyles.entry} ${styles.entry}`}>
+                      <span>
+                        {index + 1}. {donator.username ? donator.username : 
+                        (donator.address.substring(0, 6) + '...' + donator.address.substring(donator.address.length - 4))}
+                      </span>
+                      <span className={`${commonStyles.entryAmount} ${styles.regularAmount}`}>
+                        {parseFloat(donator.total_donated)}
+                        <img src={ethereumLogo} alt="ETH" className={styles.ethLogo} />
+                      </span>
+                    </div>
+                  </>
+                }
+                </>
+              ))}
+              </div>
+          </div>
 
-                <div className={`${commonStyles.entry} ${styles.entry}`}>
-                    <span>
-                      4. 0x8AB2...2847
-                    </span>
-                    <span className={commonStyles.entryAmount}>
-                      12$
-                    </span>
-                </div>
+          <div className={`${commonStyles.popUpContainer} ${styles.leaderboard}`}>
+              <div className={`${commonStyles.popUpHeader} ${styles.leaderboardHeader} ${styles.winner}`}>
+                <span className={styles.leaderboardHeaderText}>Top Winners 🏆</span>
+              </div>
 
-                <div className={`${commonStyles.entry} ${styles.entry}`}>
-                    <span>
-                      4. 0x8AB2...2847
-                    </span>
-                    <span className={commonStyles.entryAmount}>
-                      12$
-                    </span>
-                </div>
+              {topWinners.map((winner, index) => (
+                <>
+                  {index <= 2 &&
+                    <div className={styles.topEntry}>
+                      {index === 0 ? <Medal1 className={styles.medal} /> :
+                      index === 1 ? <Medal2 className={styles.medal} /> :
+                      index === 2 ? <Medal3 className={styles.medal} /> : null}
+                      <div className={styles.entryInfo}>
+                        <span className={styles.entryAddress}>
+                          {winner.username ? winner.username : 
+                          (winner.address.substring(0, 6) + '...' + winner.address.substring(winner.address.length - 4))}
+                        </span>
+                        <br />
+                        <span className={`${styles.entryAmount} ${index == 0 && styles.top}`}>
+                          {parseFloat(winner.total_win)}
+                          <img src={ethereumLogo} alt="ETH" className={styles.ethLogo} />
+                        </span>
+                      </div>
+                    </div>
+                  }
+                </>
+              ))}
 
-                <div className={`${commonStyles.entry} ${styles.entry}`}>
-                    <span>
-                      4. 0x8AB2...2847
-                    </span>
-                    <span className={commonStyles.entryAmount}>
-                      12$
-                    </span>
-                </div>
-
-                <div className={`${commonStyles.entry} ${styles.entry}`}>
-                    <span>
-                      4. 0x8AB2...2847
-                    </span>
-                    <span className={commonStyles.entryAmount}>
-                      12$
-                    </span>
-                </div>
-
-                <div className={`${commonStyles.entry} ${styles.entry}`}>
-                    <span>
-                      4. 0x8AB2...2847
-                    </span>
-                    <span className={commonStyles.entryAmount}>
-                      12$
-                    </span>
-                </div>
-
-                <div className={`${commonStyles.entry} ${styles.entry}`}>
-                    <span>
-                      4. 0x8AB2...2847
-                    </span>
-                    <span className={commonStyles.entryAmount}>
-                      12$
-                    </span>
-                </div>
-
-                <div className={`${commonStyles.entry} ${styles.entry}`}>
-                    <span>
-                      4. 0x8AB2...2847
-                    </span>
-                    <span className={commonStyles.entryAmount}>
-                      12$
-                    </span>
-                </div>
-
-                <div className={`${commonStyles.entry} ${styles.entry}`}>
-                    <span>
-                      4. 0x8AB2...2847
-                    </span>
-                    <span className={commonStyles.entryAmount}>
-                      12$
-                    </span>
-                </div>
-
-                <div className={`${commonStyles.entry} ${styles.entry}`}>
-                    <span>
-                      4. 0x8AB2...2847
-                    </span>
-                    <span className={commonStyles.entryAmount}>
-                      12$
-                    </span>
-                </div>
-
-                <div className={`${commonStyles.entry} ${styles.entry}`}>
-                    <span>
-                      4. 0x8AB2...2847
-                    </span>
-                    <span className={commonStyles.entryAmount}>
-                      12$
-                    </span>
-                </div>
-
-                <div className={`${commonStyles.entry} ${styles.entry}`}>
-                    <span>
-                      4. 0x8AB2...2847
-                    </span>
-                    <span className={commonStyles.entryAmount}>
-                      12$
-                    </span>
-                </div>
-
-                <div className={`${commonStyles.entry} ${styles.entry}`}>
-                    <span>
-                      4. 0x8AB2...2847
-                    </span>
-                    <span className={commonStyles.entryAmount}>
-                      12$
-                    </span>
-                </div>
-
-                <div className={`${commonStyles.entry} ${styles.entry}`}>
-                    <span>
-                      4. 0x8AB2...2847
-                    </span>
-                    <span className={commonStyles.entryAmount}>
-                      12$
-                    </span>
-                </div>
+              <div className={styles.regularEntries}>
+              {topWinners.map((winner, index) => (
+                <>
+                {
+                  index > 2 &&
+                  <>
+                    <div className={`${commonStyles.entry} ${styles.entry}`}>
+                      <span>
+                        {index + 1}. {winner.username ? winner.username : 
+                        (winner.address.substring(0, 6) + '...' + winner.address.substring(winner.address.length - 4))}
+                      </span>
+                      <span className={`${commonStyles.entryAmount} ${styles.regularAmount}`}>
+                        {parseFloat(winner.total_win)}
+                        <img src={ethereumLogo} alt="ETH" className={styles.ethLogo} />
+                      </span>
+                    </div>
+                  </>
+                }
+                </>
+              ))}
               </div>
           </div>
         </div>

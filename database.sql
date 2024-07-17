@@ -14,3 +14,9 @@ CREATE TABLE donations (
     donation_date DATE NOT NULL,
     donation_amount DECIMAL(18, 8) NOT NULL
 );
+
+CREATE TABLE total_donations (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    total_amount DECIMAL(18, 8) NOT NULL DEFAULT 0.00000000
+);
+

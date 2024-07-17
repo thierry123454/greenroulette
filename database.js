@@ -168,6 +168,55 @@ app.get('/api/get_donations', (req, res) => {
   });
 });
 
+// Endpoint to get top donators
+app.get('/api/top-donators', (req, res) => {
+  const sql = `
+    SELECT address, username, total_donated 
+    FROM players 
+    WHERE total_donated > 0
+    ORDER BY total_donated DESC 
+    LIMIT 100;
+  `;
+  pool.query(sql, (err, results) => {
+    if (err) {
+      console.error('Error fetching top donators:', err);
+      return res.status(500).send('Error fetching top donators');
+    }
+    res.json(results);
+  });
+});
+
+// Endpoint to get top winners
+app.get('/api/top-winners', (req, res) => {
+  const sql = `
+    SELECT address, username, total_win 
+    FROM players 
+    WHERE total_win > 0
+    ORDER BY total_win DESC 
+    LIMIT 100;
+  `;
+  pool.query(sql, (err, results) => {
+    if (err) {
+      console.error('Error fetching top winners:', err);
+      return res.status(500).send('Error fetching top winners');
+    }
+    res.json(results);
+  });
+});
+
+// Endpoint to get total amount donated
+app.get('/api/total_donated', (req, res) => {
+  const sql = `SELECT total_amount FROM total_donations;`;
+  
+  pool.query(sql, (err, results) => {
+    if (err) {
+      console.error('Error fetching total amount donated:', err);
+      return res.status(500).send('Error fetching total amount donated');
+    }
+    res.json(results);
+  });
+});
+
 // Start the server
 app.listen(port, () => {
   console.log(`Server running on http://localhost:${port}`);
