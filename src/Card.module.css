@@ -15,7 +15,7 @@
   margin: 0px 30px;
   
   position: relative;
-  left: 20px;
+  left: 8px;
   top: 20px;
 }
 
@@ -26,11 +26,11 @@
 }
 
 .black {
-  background: linear-gradient(0.14deg, #171717 -46.4%, #FFFFFF 56.73%);
+  background: linear-gradient(0.14deg, #CDFFBB -46.4%, #FFFFFF 56.73%);
 }
 
 .red {
-  background: linear-gradient(0.14deg, #CA0000 -46.4%, #FFFFFF 56.73%);
+  background: linear-gradient(0.14deg, #00C2FF -46.4%, #FFFFFF 56.73%);
 }
 
 .card p {

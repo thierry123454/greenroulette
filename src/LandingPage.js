@@ -12,6 +12,7 @@ import { ReactComponent as Hearts } from './images/landing_visual/Hearts.svg';
 import { ReactComponent as Medal1 } from './images/Medal.svg';
 import { ReactComponent as Medal2 } from './images/Medal_2.svg';
 import { ReactComponent as Medal3 } from './images/Medal_3.svg';
+import { ReactComponent as Mail } from './images/mail.svg';
 
 import axios from 'axios';
 
@@ -23,6 +24,7 @@ import TFTFLogo from './images/trees_for_the_future_logo.png';
 import ZFLogo from './images/zerofoodprint_logo.jpeg';
 import AFWLogo from './images/acts_for_water_logo.png';
 import ethereumLogo from './images/ethereum_logo.png';
+import xLogo from './images/x_logo.png';
 
 import Card from './Card';
 
@@ -48,8 +50,8 @@ function LandingPage() {
     { logo: ZFLogo, alt: 'Charity Logo', fontSize: '13px', black: true, description: 'Zero Foodprint is changing the way food is grown to restore the climate. They fund carbon farming projects through their Restore grant program. Their values include regeneration, collective action, justice and prosperity. Regeneration is the idea that with regenerative agriculture, we can not only slow but reverse climate change by drawing carbon into the soil and restoring natural ecosystems. Their work provides a renewable economic system giving businesses, and thus their patrons, an easy way to fund climate solutions. ' },
   ];
 
-  const [cards, setCards] = useState(allCharities.slice(0, 4));  // Start with the first four cards
-  const toAddRef = useRef(4);
+  const [cards, setCards] = useState(allCharities.slice(0, 2));  // Start with the first two cards
+  const toAddRef = useRef(2);
   
   // Ensure updateCards is defined with useCallback
   const updateCards =() => {
@@ -119,14 +121,21 @@ function LandingPage() {
     fetchTotalDonated();
   }, []);
 
+  const page2Ref = useRef(null);
+  const page3Ref = useRef(null);
+
+  const scrollToSection = (sectionRef) => {
+    sectionRef.current.scrollIntoView({ behavior: 'smooth' });
+  };
+
   return (
     <>
       <div className={styles.page1}>
         <div className={styles.header}>
           <Logo />
           <div className={styles.buttonGroup}>
-            <button className={styles.button}>Charities 🌍</button>
-            <button className={styles.button}>Leaderboards 🏆</button>
+            <button onClick={() => scrollToSection(page2Ref)}>Charities 🌍</button>
+            <button onClick={() => scrollToSection(page3Ref)}>Leaderboards 🏆</button>
           </div>
         </div>
         <div className={styles.main}>
@@ -152,8 +161,7 @@ function LandingPage() {
           </div>
         </div>
       </div>
-      <div className={styles.page2}>
-        <h1 className={styles.charityHeader}>See who the community of GreenRoulette is supporting</h1>
+      <div className={styles.page2} ref={page2Ref}>
         <div className={styles.cardContainer}>
           <div className={`${styles.cards} ${animate ? styles.goLeftAnimation : ''}`}>
             {cards.map(card => (
@@ -167,9 +175,28 @@ function LandingPage() {
           <FrontCoin className={styles.frontCoin2}/>
           <Hearts className={styles.hearts2}/>
         </div>
+        <div className={styles.charitySectionInfo}>
+          <h1 className={styles.sectionHeader}>Our Partners for Change</h1>
+          <span className={styles.infoText} style={{fontSize: '20px'}}>
+            At GreenRoulette, we believe in making a difference with every
+            spin. That's why we are proud to partner with a diverse range of 
+            non-profit organizations dedicated to creating a better world. 
+            Together, we're turning fun into meaningful action, ensuring that 
+            every game played  contributes to a brighter, more sustainable 
+            future for all. Join us in supporting these incredible causes and be a
+            part of something bigger.
+        </span>
+        </div>
       </div>
-      <div className={styles.page3}>
-        <h1 className={styles.charityHeader}>And all of this would not be possible without our players.</h1>
+      <div className={styles.page3} ref={page3Ref}>
+        <h1 className={styles.sectionHeader} style={{color: 'white'}}><span id={styles.topDonator}>Top Donators</span> and <span id={styles.champion}>Champions</span></h1>
+        
+        <span className={styles.leaderboardText}>
+          Explore the GreenRoulette Leaderboards to see the community's top contributors and winners. 
+          Whether it's the highest donations or the most successful spins, this is where our most dedicated 
+          players shine. Join the ranks, make your mark, and see how you compare to the best!
+        </span>
+        
         <div className={styles.leaderboards}>
           <div className={`${commonStyles.popUpContainer} ${styles.leaderboard}`}>
               <div className={`${commonStyles.popUpHeader} ${styles.leaderboardHeader}`}>
@@ -273,6 +300,14 @@ function LandingPage() {
               </div>
           </div>
         </div>
+      </div>
+      <div className={styles.footbar}>
+        <Logo />
+
+        <div className={styles.buttonGroup}>
+            <button className={styles.footbarButton}><Mail /></button>
+            <button className={styles.footbarButton}><img src={xLogo}></img></button>
+          </div>
       </div>
     </>
   );

@@ -21,7 +21,6 @@ html, body {
   width: 100%;
   height: 100vh;
   background: linear-gradient(180deg, #CDFFBB 0%, #FFDA7A 100%);
-  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.25);
 }
 
 .header {
@@ -38,14 +37,13 @@ html, body {
 .buttonGroup button {
   background: rgba(205, 255, 187, 0.01);
   box-shadow: 1px 1px 5px rgba(0, 0, 0, 0.25);
-  border-radius: 10px;
 
   margin-top: 10px;
 
   margin-left: 10px; /* Spacing between buttons */
   padding: 8px 16px; /* Padding inside buttons */
   border: none; /* Remove default border */
-  border-radius: 4px; /* Rounded corners */
+  border-radius: 10px; /* Rounded corners */
   cursor: pointer; /* Cursor indicates button */
 
   /* Small text */
@@ -250,45 +248,50 @@ button:hover {
   width: 100%;
   height: 100vh;
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   align-items: center;
   justify-content: center;
   text-align: center;
-  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.25);
+  z-index: -2;
+  background: linear-gradient(180deg, #FFDA7A 0%,#CDFFBB 100%);
   position: relative;
 }
 
-.charityHeader {
+.charitySectionInfo {
+  width: 50%;
+  display: flex;
+  flex-direction: column;
+  text-align: center;
+  align-items: center;
+  justify-content: center;
+}
+
+.sectionHeader {
   font-size: 32px;
   margin-bottom: 20px;
 
   font-style: normal;
-  font-weight: 400;
-  font-size: 40px;
+  font-weight: 800;
+  font-size: 45px;
   line-height: 150%;
-  /* identical to box height, or 60px */
-  display: flex;
-  align-items: center;
-
-  background: linear-gradient(180deg, #2F2F2F 38%, #000000 78%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  text-fill-color: transparent;
-
+  
+  color: #CDFFBB;
   text-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
+  -webkit-text-stroke: 1px #000000;
 }
 
 .cardContainer {
   height: 60%;
-  width: 95%;
-  background: linear-gradient(180deg, #CDFFBB 0%, #FFFFFF 100%);
-  box-shadow: inset 0px 0px 5px rgba(0, 0, 0, 0.5);
+  width: 713.5px;
+  min-width: 713.5px;
+  background: linear-gradient(180deg, rgba(0, 194, 255, 0.5) 0%, rgba(255, 255, 255, 0.5) 100%);
+  box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.25);
   border-radius: 10px;
   overflow-x: hidden;
   position: relative;
   z-index: -1;
   overflow: hidden; /* To keep absolute elements inside */
+  margin-left: 50px;
 }
 
 .cards {
@@ -310,12 +313,11 @@ button:hover {
 
 .elements2 {
   height: 90%;
-  width: 100%;
+  min-width: 763.5px;
   border-radius: 10px;
-  overflow-x: hidden;
   position: absolute;
   top: 100px;
-  overflow: hidden; /* To keep absolute elements inside */
+  left: 0;
 }
 
 .middleCoin2, .frontCoin2, .hearts2 {
@@ -324,22 +326,22 @@ button:hover {
 
 .hearts2 {
   animation: floatHearts 4s ease-in-out infinite;
-  right: 775px;
-  top: 500px;
+  top: 450px;
+  right: 400px;
   z-index: 2;
 }
 
 .middleCoin2 {
   animation: waveMiddleCoin 4s ease-in-out infinite;
   z-index: -2;
-  left: 800px;
-  top: -45px;
+  top: -80px;
+  left: 510px;
 }
 
 .frontCoin2 {
   animation: waveFrontCoin 4s ease-in-out infinite;
-  left: 750px;
-  top: -30px;
+  top: -60px;
+  left: 450px;
 }
 
 /* PAGE 3 */
@@ -356,6 +358,37 @@ button:hover {
   z-index: -100;
 }
 
+#champion {
+  background: linear-gradient(180deg, #FFE39A 10%, #FFCB46 100%);
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-shadow: none;
+  filter: drop-shadow(0px 4px 4px rgba(0, 0, 0, 0.25));
+}
+
+#topDonator {
+  background: linear-gradient(180deg, #CDFFBB 10%, #00C2FF 100%);
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-shadow: none;
+  filter: drop-shadow(0px 4px 4px rgba(0, 0, 0, 0.25));
+}
+
+.leaderboardText {
+  width: 65%;
+
+  font-style: normal;
+  font-weight: 300;
+  font-size: 20px;
+  line-height: 150%;
+
+  margin-bottom: 40px;
+
+  color: #000000;
+
+  text-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
+}
+
 .leaderboards {
   width: 900px;
   display: flex;
@@ -365,7 +398,7 @@ button:hover {
 
 .leaderboard {
   width: 400px;
-  height: 600px;
+  height: 500px;
 
   background: #EAEAEA;
   border: 1px solid #E0E0E0;
@@ -483,7 +516,6 @@ button:hover {
   background: #CDFFBB;
 }
 
-
 /* Add to your stylesheet */
 .ethLogo {
   width: 12px; /* Adjust size as needed */
@@ -492,4 +524,18 @@ button:hover {
   vertical-align: middle; /* Aligns with the middle of the text */
   position: relative;
   top: -2px;
+}
+
+/* FOOTBAR */
+.footbar {
+  width: 100%;
+  background: white;
+  display: flex;
+  align-items: center; /* Aligns items vertically in the center */
+  justify-content: space-between; /* Puts maximum space between flex items */
+}
+
+.footbarButton {
+  border-radius: 100px;
+  box-shadow: 0px 0px 1px rgba(0, 0, 0, 0.5) !important;
 }

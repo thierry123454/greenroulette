@@ -1,7 +1,7 @@
 import React, { useContext, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { GameContext } from './GameContext'; // Ensure this path is correct
-import { ReactComponent as Logo } from './images/logo.svg'
+import Logo from './Logo'; // Import the new Logo component
 import { ReactComponent as Zero } from './images/0.svg'
 import { ReactComponent as Black } from './images/black.svg'
 import { ReactComponent as Red } from './images/red.svg'
@@ -78,7 +78,7 @@ function RouletteComponent() {
   return (
     <div className={`${commonStyles.container} ${isLoaded ? commonStyles.loaded : ''}`}>
       <div>
-        <Logo className={commonStyles.logo} />
+        <Logo />
       </div>
       <div className={`${commonStyles.content} ${styles.content}`}>
         <Arrow id={styles.arrow} />

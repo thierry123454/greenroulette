@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { GameContext } from './GameContext';
 import commonStyles from './CommonStyles.module.css';
 import styles from './BettingComponent.module.css';
-import { ReactComponent as Logo } from './images/logo.svg';
+import Logo from './Logo';
 import io from 'socket.io-client';
 import metamaskLogo from'./images/metamask.png';
 import rouletteContractAbi from './abis/rouletteContractAbi.json';
@@ -227,7 +227,7 @@ function BettingComponent({ web3, isChatOpen, setIsChatOpen, userAddress }) {
   return (
     <div className={`${commonStyles.container} ${isLoaded ? commonStyles.loaded : ''}`}>
       <div>
-        <Logo className={commonStyles.logo} />
+        <Logo />
       </div>
 
       <button onClick={toggleChat} className={`${styles.sideBtn} ${styles.openChatBtn} ${isChatOpen ? styles.hidden : ''}`}>

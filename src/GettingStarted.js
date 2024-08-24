@@ -3,7 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import Web3 from 'web3';
 import commonStyles from './CommonStyles.module.css';
 import styles from './GettingStarted.module.css';
-import { ReactComponent as Logo } from './images/logo.svg';
+import Logo from './Logo';
 import metamaskLogo from './images/metamask.png';
 
 import GClogo from './images/google_chrome_logo.png';
@@ -61,7 +61,7 @@ function GettingStarted({ setWeb3, setUserAddress }) {
   return (
     <div className={`${commonStyles.container} ${isLoaded ? commonStyles.loaded : ''}`}>
       <div>
-        <Logo className={commonStyles.logo} />
+        <Logo />
       </div>
       <div className={`${commonStyles.content} ${styles.content}`}>
         {isSafari ? 

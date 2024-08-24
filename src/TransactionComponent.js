@@ -1,7 +1,7 @@
 import React, { useContext, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { GameContext } from './GameContext'; // Ensure this path is correct
-import { ReactComponent as Logo } from './images/logo.svg'
+import Logo from './Logo'; // Import the new Logo component
 import { ReactComponent as RouletteBack } from './images/roulette_back.svg'
 import { ReactComponent as RouletteSpinning } from './images/roulette_spinning.svg'
 import commonStyles from './CommonStyles.module.css';
@@ -52,7 +52,7 @@ function TransactionComponent() {
   return (
     <div className={`${commonStyles.container} ${isLoaded ? commonStyles.loaded : ''}`}>
       <div>
-        <Logo className={commonStyles.logo} />
+        <Logo />
       </div>
       <div className={commonStyles.content}>
         <div className={`${commonStyles.info} ${styles.info} ${specialStyle ? styles.special : ''}`}>
