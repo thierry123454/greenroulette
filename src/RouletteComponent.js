@@ -38,7 +38,7 @@ function RouletteComponent() {
   const onBackButtonEvent = (e) => {
     e.preventDefault();
     if (!finishStatus) {
-        if (window.confirm("You have a bet placed. Are you sure you want to leave?")) {
+        if (window.confirm("You have placed a bet. Are you sure you want to leave? Leaving / refreshing will cause the elements in the page to not reflect you having placed a bet.")) {
             setfinishStatus(true)
             // your logic
             navigate('/');
@@ -59,7 +59,7 @@ function RouletteComponent() {
 
     const handleBeforeRouteChange = () => {
       if (gameState.bet.placed) {
-        const confirmationMessage = 'You have a bet placed. Are you sure you want to leave?';
+        const confirmationMessage = 'You have placed a bet. Are you sure you want to leave? Leaving / refreshing will cause the elements in the page to not reflect you having placed a bet.';
         return window.confirm(confirmationMessage);
       }
       return true;

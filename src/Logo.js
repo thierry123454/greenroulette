@@ -12,7 +12,7 @@ const Logo = () => {
   const handleLogoClick = () => {
     if (gameState.bet.placed) {
       const confirmation = window.confirm(
-        'You have a bet placed. Are you sure you want to leave this page?'
+        'You have placed a bet. Are you sure you want to leave? Leaving / refreshing will cause the elements in the page to not reflect you having placed a bet.'
       );
       if (!confirmation) {
         return; // Cancel navigation if the user does not confirm

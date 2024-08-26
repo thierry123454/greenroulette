@@ -6,7 +6,7 @@ export const GameProvider = ({ children }) => {
   const initialState = {
     stage: null,
     outcome: null,
-    bet: { amount: null, placed: null, choice: null },
+    bet: { amount: null, placed: true, choice: null },
     exchange: 1,
     has_visited_bet: false,
     total_red: 0,
