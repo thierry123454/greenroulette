@@ -9,6 +9,8 @@ import metamaskLogo from './images/metamask.png';
 import GClogo from './images/google_chrome_logo.png';
 import FFlogo from './images/firefox_logo.png';
 
+import { GameContext } from './GameContext';
+
 import axios from 'axios';
 const database_api = axios.create({
   baseURL: 'http://localhost:6969/'
@@ -17,6 +19,8 @@ const database_api = axios.create({
 function GettingStarted({ setWeb3, setUserAddress }) {
   const [isLoaded, setIsLoaded] = useState(false); // State to track loading
   const [isSafari, setIsSafari] = useState(false);
+
+  const { gameState, setGameState } = useContext(GameContext);
 
   const navigate = useNavigate();
 
@@ -43,10 +47,15 @@ function GettingStarted({ setWeb3, setUserAddress }) {
         const web3Instance = new Web3(window.ethereum);
         setWeb3(web3Instance);
         setUserAddress(accounts[0]);
+        setGameState(prevState => ({ ...prevState, userAddress: accounts[0] }));
 
         const response = await database_api.post('/api/add-player', { address: accounts[0] });
-        if (!response.data.success) {
-          console.error('Failed to add player', response);
+
+        // Check the affectedRows to determine if a new player was added
+        if (response.data.results.affectedRows === 0) {
+          console.warn('Player already exists in the database');
+        } else if (response.data.results.affectedRows > 0) {
+          console.log('Player added successfully');
         }
 
         navigate('/betting');
@@ -67,7 +76,7 @@ function GettingStarted({ setWeb3, setUserAddress }) {
         {isSafari ? 
         (
           <>
-            <h1 id={styles.header} style={{fontSize: '24px'}}>Oops! It seems like you’re using Safari!</h1>
+            <h1 id={styles.header} style={{fontSize: '24px'}}>Oops! It seems like you're using Safari!</h1>
             <span>Please install Chrome or Firefox!</span>
             <div id={styles.browsers}>
               <Link to="https://www.google.com/chrome">

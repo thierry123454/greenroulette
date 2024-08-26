@@ -361,4 +361,8 @@
   text-align: left;
 
   overflow-y: scroll;
+
+  /* Transparent scrollbar */
+  scrollbar-width: none; /* For Firefox */
+  scrollbar-color: transparent transparent; /* For Firefox */
 }

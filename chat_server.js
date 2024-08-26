@@ -22,13 +22,21 @@ const limiter = rateLimit({
 
 app.use(limiter);
 
-io.on('connection', (socket) => {
-  console.log('A user connected');
+// Keep track of the number of connected users
+let onlineUsers = 0;
 
-  socket.on('send message', (address, betChoice, betAmount, msg) => {
+io.on('connection', (socket) => {
+  onlineUsers++;
+  console.log('A user connected', `Total online: ${onlineUsers}`);
+
+  // Emit the updated online users count to all clients
+  io.emit('onlineUsers', onlineUsers);
+
+  socket.on('send message', (address, username, betChoice, betAmount, msg) => {
     const safeMessage = xss(msg);
     io.emit('message', { 
       user: address, 
+      name: username,
       text: safeMessage, 
       betChoice: betChoice, 
       betAmount: betAmount 
@@ -37,6 +45,10 @@ io.on('connection', (socket) => {
 
   socket.on('disconnect', () => {
     console.log('A user disconnected');
+    onlineUsers--;
+
+    // Emit the updated online users count to all clients
+    io.emit('onlineUsers', onlineUsers);
   });
 });
 

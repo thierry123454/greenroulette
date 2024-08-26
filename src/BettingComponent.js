@@ -30,6 +30,8 @@ function BettingComponent({ web3, isChatOpen, setIsChatOpen, userAddress }) {
 
   const navigate = useNavigate();
   const { gameState, setGameState, resetGameState } = useContext(GameContext);
+  const [finishStatus, setfinishStatus] = useState(false);
+
   const [specialStyle, setSpecialStyle] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false); // State to track loading
   const [betPlaced, setIsPlaced] = useState(-1); // State to track loading
@@ -46,6 +48,55 @@ function BettingComponent({ web3, isChatOpen, setIsChatOpen, userAddress }) {
 
   const contract = new web3.eth.Contract(rouletteContractAbi, contractAddress);
 
+  const onBackButtonEvent = (e) => {
+    e.preventDefault();
+    if (!finishStatus) {
+        if (window.confirm("You have a bet placed. Are you sure you want to leave?")) {
+            setfinishStatus(true)
+            // your logic
+            navigate('/');
+        } else {
+            window.history.pushState(null, null, window.location.pathname);
+            setfinishStatus(false)
+        }
+    }
+  }
+
+  useEffect(() => {
+    const handleBeforeUnload = (event) => {
+      if (gameState.bet.placed) {
+        event.preventDefault(); // This is necessary to trigger the dialog
+        event.returnValue = ''; // Modern browsers require returnValue to be set
+      }
+    };
+
+    const handleBeforeRouteChange = () => {
+      if (gameState.bet.placed) {
+        const confirmationMessage = 'You have a bet placed. Are you sure you want to leave?';
+        return window.confirm(confirmationMessage);
+      }
+      return true;
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+
+    // If you use React Router, add a listener for route changes
+    if (typeof window !== 'undefined') {
+      window.onpopstate = handleBeforeRouteChange;
+    }
+
+    window.history.pushState(null, null, window.location.pathname);
+    window.addEventListener('popstate', onBackButtonEvent);
+
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+      window.removeEventListener('popstate', onBackButtonEvent);  
+      if (typeof window !== 'undefined') {
+        window.onpopstate = null;
+      }
+    };
+  }, [gameState.bet.placed]);
+
   // Convert USD amount to ETH
   useEffect(() => {
     if (gameState.exchange && betAmount) {
@@ -54,13 +105,13 @@ function BettingComponent({ web3, isChatOpen, setIsChatOpen, userAddress }) {
     }
   }, [betAmount, gameState.exchange]);
 
-    // Convert USD amount of bet to ETH
-    useEffect(() => {
-      if (gameState.exchange && donationAmount) {
-        const ethEquivalent = parseFloat(donationAmount) / gameState.exchange;
-        setEthAmountDonation(ethEquivalent.toFixed(4));
-      }
-    }, [donationAmount, gameState.exchange]);
+  // Convert USD amount of bet to ETH
+  useEffect(() => {
+    if (gameState.exchange && donationAmount) {
+      const ethEquivalent = parseFloat(donationAmount) / gameState.exchange;
+      setEthAmountDonation(ethEquivalent.toFixed(4));
+    }
+  }, [donationAmount, gameState.exchange]);
 
   // Reset game state when component mounts
   useEffect(() => {
@@ -158,10 +209,17 @@ function BettingComponent({ web3, isChatOpen, setIsChatOpen, userAddress }) {
   };
 
   const updateUsername = async () => {
+    // Check if the username starts with '0x'
+    if (username.startsWith('0x')) {
+      setStatusMessage("Username cannot start with '0x'. Please choose a different username.");
+      return; // Exit the function without making the API request
+    }
+
     try {
         const response = await database_api.post('/api/update-username', { username, userAddress });
         if (response.data.success) {
-            setStatusMessage("Username successfully set!");
+            setStatusMessage("Username successfully set! Please refresh the page for it to update in chat.");
+            setUsername("");
         } else {
             setStatusMessage("Failed to set username.");
         }
@@ -347,7 +405,10 @@ function BettingComponent({ web3, isChatOpen, setIsChatOpen, userAddress }) {
                       {donations.map((donation, index) => (
                         <div key={index} className={commonStyles.entry}>
                           <span>
-                            {donation.user_address ? donation.user_address.substring(0, 6) + '...' + donation.user_address.substring(donation.user_address.length - 4) : 'Anonymous'}
+                            {donation.user_address ? 
+                            (donation.username ? donation.username : 
+                            donation.user_address.substring(0, 6) + '...' + donation.user_address.substring(donation.user_address.length - 4)) : 
+                            'Anonymous'}
                           </span>
                           <span className={commonStyles.entryAmount}>
                             ${parseFloat(donation.donation_amount).toFixed(2)}

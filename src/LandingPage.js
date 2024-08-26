@@ -178,7 +178,7 @@ function LandingPage() {
         <div className={styles.charitySectionInfo}>
           <h1 className={styles.sectionHeader}>Our Partners for Change</h1>
           <span className={styles.infoText} style={{fontSize: '20px'}}>
-            At GreenRoulette, we believe in making a difference with every
+            We want to make a difference with every
             spin. That's why we are proud to partner with a diverse range of 
             non-profit organizations dedicated to creating a better world. 
             Together, we're turning fun into meaningful action, ensuring that 

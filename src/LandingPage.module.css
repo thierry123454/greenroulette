@@ -505,6 +505,10 @@ button:hover {
   height: 44%;
   overflow-y: scroll;
   margin-top: 40px;
+
+  /* Transparent scrollbar */
+  scrollbar-width: none; /* For Firefox */
+  scrollbar-color: transparent transparent; /* For Firefox */
 }
 
 .entry {

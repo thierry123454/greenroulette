@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useContext, useRef } from 'react';
 import io from 'socket.io-client';
+import axios from 'axios';
 
 import styles from './Chat.module.css';
 import commonStyles from './CommonStyles.module.css'
@@ -16,6 +17,11 @@ timer.on('connect', () => {
   console.log('Connected to the server');
 });
 
+// Create an instance of axios with a base URL
+const database_api = axios.create({
+  baseURL: 'http://localhost:6969/'
+});
+
 const roundTwoDecimals = (number) => {
   return Math.round((number + Number.EPSILON) * 100) / 100
 };
@@ -25,8 +31,29 @@ function Chat({ setIsChatOpen, isChatOpen }) {
   const [input, setInput] = useState('');
   const { gameState } = useContext(GameContext);
   const { userAddress, bet, exchange, total_red, total_black } = gameState;
+  const [username, setUsername] = useState(null);
+  const [onlineUsers, setOnlineUsers] = useState(0);
 
   const messagesEndRef = useRef(null);
+
+  useEffect(() => {
+    // Fetch the username when the component mounts
+    const fetchUsername = async () => {
+      if (userAddress) {
+        try {
+          const response = await database_api.get(`/api/get_username/${userAddress}`);
+          if (response.data.username) {
+            console.log("Found username!", response.data.username);
+            setUsername(response.data.username);
+          }
+        } catch (error) {
+          console.error('Failed to fetch username:', error);
+        }
+      }
+    };
+
+    fetchUsername();
+  }, [userAddress]);
 
   useEffect(() => {
     socket.on('message', message => {
@@ -34,8 +61,14 @@ function Chat({ setIsChatOpen, isChatOpen }) {
       console.log(messages);
     });
 
+    // Listen for online users count updates
+    socket.on('onlineUsers', (count) => {
+      setOnlineUsers(count);
+    });
+
     // Cleanup on component unmount
     return () => socket.off('message');
+    socket.off('onlineUsers');
   }, []);
 
   // Get game state information
@@ -45,6 +78,7 @@ function Chat({ setIsChatOpen, isChatOpen }) {
         const specialMessage = {
           text: ` just put ${roundTwoDecimals(message.betAmount * message.betExchange)} USD on ${message.betChoice === 0 ? "Red" : "Black"}!`,
           user: message.user,
+          name: message.name,
           type: 'bet',
           incomingBetChoice: message.betChoice
         };
@@ -78,8 +112,8 @@ function Chat({ setIsChatOpen, isChatOpen }) {
 
   const sendMessage = () => {
     if (input.trim() && input.length <= 200) {
-      // Send the message with additional user data
-      socket.emit('send message', userAddress, bet.choice, bet.amount, input);
+      console.log(username);
+      socket.emit('send message', userAddress, username, bet.choice, bet.amount, input);
       setInput('');
     }
   };
@@ -87,6 +121,11 @@ function Chat({ setIsChatOpen, isChatOpen }) {
   const handleCloseChat = () => {
     setIsChatOpen(false);
   };
+
+  function isEthereumAddress(address) {
+    // Check if the address starts with '0x' and is 42 characters long
+    return /^0x[a-fA-F0-9]{40}$/.test(address);
+  }
 
   return (
     <div className={`${commonStyles.popUpContainer} ${styles.chatContainer} ${isChatOpen ? styles.open : styles.closed}`}>
@@ -126,6 +165,9 @@ function Chat({ setIsChatOpen, isChatOpen }) {
               <li>Privacy Matters: Don’t share personal information or ask for others' personal details.</li>
               <li>Remember, violating these rules can lead to a timeout or ban from chat. Let’s create a positive and enjoyable environment for everyone!</li>
             </ul>
+            FYI: There are currently {onlineUsers} players online.
+            <br />
+            <br />
             Happy Chatting! 🚀
           </div>
         </div>
@@ -136,7 +178,12 @@ function Chat({ setIsChatOpen, isChatOpen }) {
             msg.type !== 'bet' ?
             <>
               <span id={styles.userInfo}>
-                {msg.user === userAddress ? "You " : msg.user.substring(0,6) + "..." + msg.user.substring(userAddress.length - 4) + " "}
+                {msg.user === userAddress ? "You " :
+                !msg.name ?
+                msg.user.substring(0,6) + "..." + msg.user.substring(userAddress.length - 4) + " " : 
+                msg.name + " "
+                }
+
                 <span style={{ color: msg.betChoice !== null ? (msg.betChoice === 0 ? '#CA0000' : "#171717") : 'gray' }}>
                   {msg.betChoice !== null ?
                     `(${roundTwoDecimals(msg.betAmount * exchange)} USD, ${(msg.betChoice === 0 ? 'Red' : "Black")})` :
@@ -156,7 +203,11 @@ function Chat({ setIsChatOpen, isChatOpen }) {
             `}>
               {
               msg.type === 'bet' ? 
-              (msg.user.toLowerCase() === userAddress ? "You " + msg.text : msg.user.substring(0,6) + "..." + msg.user.substring(userAddress.length - 4) + " " + msg.text)
+              (msg.user.toLowerCase() === userAddress ? 
+              "You " + msg.text : 
+              (!msg.name ?
+                msg.user.substring(0,6) + "..." + msg.user.substring(userAddress.length - 4) + " " : 
+                msg.name + " ") + msg.text)
               : msg.text}
             </div>
           </div>

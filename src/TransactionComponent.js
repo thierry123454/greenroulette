@@ -17,6 +17,56 @@ function TransactionComponent() {
   const { gameState, setGameState } = useContext(GameContext);
   const [specialStyle, setSpecialStyle] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false); // State to track loading
+  const [finishStatus, setfinishStatus] = useState(false);
+
+  const onBackButtonEvent = (e) => {
+    e.preventDefault();
+    if (!finishStatus) {
+        if (window.confirm("You have a bet placed. Are you sure you want to leave?")) {
+            setfinishStatus(true)
+            // your logic
+            navigate('/');
+        } else {
+            window.history.pushState(null, null, window.location.pathname);
+            setfinishStatus(false)
+        }
+    }
+  }
+
+  useEffect(() => {
+    const handleBeforeUnload = (event) => {
+      if (gameState.bet.placed) {
+        event.preventDefault(); // This is necessary to trigger the dialog
+        event.returnValue = ''; // Modern browsers require returnValue to be set
+      }
+    };
+
+    const handleBeforeRouteChange = () => {
+      if (gameState.bet.placed) {
+        const confirmationMessage = 'You have a bet placed. Are you sure you want to leave?';
+        return window.confirm(confirmationMessage);
+      }
+      return true;
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+
+    // If you use React Router, add a listener for route changes
+    if (typeof window !== 'undefined') {
+      window.onpopstate = handleBeforeRouteChange;
+    }
+
+    window.history.pushState(null, null, window.location.pathname);
+    window.addEventListener('popstate', onBackButtonEvent);
+
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+      window.removeEventListener('popstate', onBackButtonEvent);  
+      if (typeof window !== 'undefined') {
+        window.onpopstate = null;
+      }
+    };
+  }, [gameState.bet.placed]);
 
   useEffect(() => {
     const timerHandler = (data) => {

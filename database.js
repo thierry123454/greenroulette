@@ -157,7 +157,23 @@ app.post('/api/donations', (req, res) => {
 });
 
 app.get('/api/get_donations', (req, res) => {
-  const sql = `SELECT donation_date, user_address, donation_amount FROM donations ORDER BY donation_date DESC LIMIT 10`;
+  const sql = `
+  SELECT 
+    donations.donation_date, 
+    donations.user_address, 
+    donations.donation_amount,
+    players.username 
+  FROM 
+    donations 
+  LEFT JOIN 
+    players 
+  ON 
+    donations.user_address = players.address 
+  ORDER BY 
+    donations.donation_date DESC 
+  LIMIT 10
+`;
+
   pool.query(sql, (err, results) => {
     if (err) {
       console.error('Error fetching donations:', err);
@@ -214,6 +230,26 @@ app.get('/api/total_donated', (req, res) => {
       return res.status(500).send('Error fetching total amount donated');
     }
     res.json(results);
+  });
+});
+
+// Endpoint to get the username given an address
+app.get('/api/get_username/:address', (req, res) => {
+  const { address } = req.params;
+
+  const sql = `SELECT username FROM players WHERE address = ? LIMIT 1`;
+
+  pool.query(sql, [address], (err, results) => {
+    if (err) {
+      console.error('Error fetching username:', err);
+      return res.status(500).json({ error: 'Error fetching username' });
+    }
+
+    if (results.length === 0) {
+      return res.status(404).json({ message: 'Username not found for the given address' });
+    }
+
+    res.json({ username: results[0].username });
   });
 });
 

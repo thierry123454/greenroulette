@@ -58,6 +58,30 @@ let totalBlack = 0;
 
 let lastCheckedIndex = 0;  // To track the last index of bets we checked
 
+const mysql = require('mysql2/promise');  // Use promise-based MySQL client
+
+// Create a MySQL connection pool
+const pool = mysql.createPool({
+  host: 'localhost',
+  user: 'root',
+  password: process.env.DB_PASS,
+  database: 'GreenRoulette'
+});
+
+async function getUsername(address) {
+  try {
+    const [rows] = await pool.query('SELECT username FROM players WHERE address = ? LIMIT 1', [address]);
+    if (rows.length > 0 && rows[0].username) {
+      return rows[0].username;
+    } else {
+      return null;  // Return null if no username is found
+    }
+  } catch (error) {
+    console.error('Error fetching username:', error);
+    return null;
+  }
+}
+
 const getEthPrice = async () => {
   const apiKey = process.env.CRYPTO_COMPARE_API_KEY; // Ensure you have this in your environment variables
   const url = `https://min-api.cryptocompare.com/data/price?fsym=ETH&tsyms=USD&api_key=${apiKey}`;
@@ -119,8 +143,12 @@ async function checkNewBets() {
 
     console.log(`New bet from ${bettor}: Amount ${web3.utils.fromWei(betDetails.amount, 'ether')} ETH on ${guess === 0 ? 'Red' : 'Black'}`);
 
+    // Fetch the username from the database
+    const username = await getUsername(bettor);
+
     const message = {
       user: bettor,
+      name: username,
       betAmount: ethAmount,
       betChoice: guess,
       betExchange: currentEthPrice
@@ -299,8 +327,10 @@ async function fetchRandomNumber() {
 }
 
 // Start the initial stage as soon as the server starts
-openBetting()
+openBetting();
 startStageOne();
+
+// payoutWinners(0);
 
 // Handling a new connection
 io.on('connection', (socket) => {

@@ -17,7 +17,10 @@ export const GameProvider = ({ children }) => {
   const [gameState, setGameState] = useState(initialState);
 
   const resetGameState = useCallback(() => {
-    setGameState(initialState);
+    setGameState((prevState) => ({
+      ...initialState,
+      userAddress: prevState.userAddress,  // Preserve the userAddress
+    }));
   }, []);
 
   return (
