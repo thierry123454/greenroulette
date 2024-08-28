@@ -530,6 +530,18 @@ button:hover {
   top: -2px;
 }
 
+/* Fade In */
+.page2 > *, .page3 > * {
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 1s ease-out, transform 1s ease-out;
+}
+
+.fadeIn > * {
+  opacity: 1;
+  transform: translateY(0);
+}
+
 /* FOOTBAR */
 .footbar {
   width: 100%;

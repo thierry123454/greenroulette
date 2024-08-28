@@ -107,12 +107,16 @@
   cursor: default;
 }
 
+.red:hover {
+  background-color: #CA0000;
+}
+
 .canHoverRed {
   cursor: pointer !important;
 }
 
 .canHoverRed:hover {
-  background-color: #ba0000;
+  background-color: #ba0000 !important;
 }
 
 .black {
@@ -120,12 +124,16 @@
   cursor: default;
 }
 
+.black:hover {
+  background-color: #171717;
+}
+
 .canHoverBlack {
   cursor: pointer !important;
 }
 
 .canHoverBlack:hover {
-  background-color: #000000;
+  background-color: #000000 !important;
 }
 
 .button:last-child {

@@ -5,6 +5,8 @@ import commonStyles from './CommonStyles.module.css';
 import styles from './OutcomeComponent.module.css';
 import io from 'socket.io-client';
 
+import CountUp from 'react-countup';
+
 // Initialize socket connection
 const socket = io('https://localhost:3001', { secure: true });
 
@@ -31,7 +33,7 @@ function TransactionComponent() {
   useEffect(() => {
     const timerHandler = (data) => {
       console.log('Timer data received:', data);
-      setGameState(prevState => ({ ...prevState, timer: data.countdown, exchange: data.exchange, stage: data.stage, total_red: data.total_red, total_black: data.total_black }));
+      setGameState(prevState => ({ ...prevState, outcome: data.game_outcome, timer: data.countdown, exchange: data.exchange, stage: data.stage, total_red: data.total_red, total_black: data.total_black }));
     };
 
     // Listen for timer updates from server
@@ -52,7 +54,6 @@ function TransactionComponent() {
     }
   }, [gameState, navigate]);
 
-  // Example outcome logic
   useEffect(() => {
     // Calculate the outcome when gameState updates
     if (gameState.outcome != null) {
@@ -109,15 +110,15 @@ function TransactionComponent() {
                 {outcome == 0 ? "You Won🏆" : (outcome == 1 ? "You Donated🌳*" : "Others Won🏆")}
               </h2>
               <span className={styles.amount}>
-                {outcome == 0 ? '' + roundTwoDecimals(playerWon) + '$' 
-                : (outcome == 1 ? '' + roundTwoDecimals(playerWon * 0.75) + '$' : 
-                '' + roundTwoDecimals(totalWon) + '$')}
+                {outcome == 0 ? <CountUp duration={5} end={playerWon} suffix="$" /> 
+                : (outcome == 1 ? <CountUp duration={5} end={playerWon * 0.75} suffix="$" /> : 
+                 <CountUp duration={5} end={totalWon} suffix="$" />)}
               </span>
             </div>
             <hr className={commonStyles.line} />
             <div className={`${commonStyles.timer} ${styles.donatedInfo}`}>
               <h2 className={styles.title}>Total Donated This Round🌍*</h2>
-              <span className={styles.amount}>{'' + roundTwoDecimals(totalDonated) + '$'}</span>
+              <span className={styles.amount}><CountUp duration={10} end={totalDonated} suffix="$" /></span>
               <span id={styles.subtext}>* Actual donation amount may be less if future bets decrease pool size.</span>
             </div>
         </div>

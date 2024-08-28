@@ -13,6 +13,7 @@ import { ReactComponent as Medal1 } from './images/Medal.svg';
 import { ReactComponent as Medal2 } from './images/Medal_2.svg';
 import { ReactComponent as Medal3 } from './images/Medal_3.svg';
 import { ReactComponent as Mail } from './images/mail.svg';
+import { ReactTyped } from "react-typed";
 
 import axios from 'axios';
 
@@ -39,6 +40,23 @@ function LandingPage() {
   const [animate, setAnimate] = useState(false);
 
   const navigate = useNavigate();
+
+  const phrases = [
+    "the Planet",
+    "Education",
+    "the Future",
+    "the Children",
+    "the Community",
+    "the Environment",
+    "Well-being",
+    "Hope",
+    "Change",
+    "Sustainability",
+    "Growth",
+    "Harmony",
+    "Unity",
+    "Prosperity"
+  ];
 
   const allCharities = [
     { logo: STCLogo, alt: 'Charity Logo', fontSize: '16px', black: true, description: 'Save the Children is passionately committed to one goal: Giving all children the best chance for the future they deserve – a healthy start in life, to be protected from harm and the opportunity to learn. Every day, in times of crisis, here in the U.S. and in more than 110 countries around the world, they do whatever it takes to reach the most vulnerable children and their families. ' },
@@ -128,6 +146,41 @@ function LandingPage() {
     sectionRef.current.scrollIntoView({ behavior: 'smooth' });
   };
 
+  const fadeInRef1 = useRef(null);
+  const fadeInRef2 = useRef(null);
+  const [page2Visible, setPage2Visible] = useState(false);
+  const [page3Visible, setPage3Visible] = useState(false);
+
+  useEffect(() => {
+    const observerOptions = {
+      root: null,
+      rootMargin: '0px',
+      threshold: 0.1
+    };
+
+    const observerCallback = (entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          if (entry.target === fadeInRef1.current) {
+            setPage2Visible(true);
+          } else if (entry.target === fadeInRef2.current) {
+            setPage3Visible(true);
+          }
+        }
+      });
+    };
+
+    const observer = new IntersectionObserver(observerCallback, observerOptions);
+
+    if (fadeInRef1.current) observer.observe(fadeInRef1.current);
+    if (fadeInRef2.current) observer.observe(fadeInRef2.current);
+
+    return () => {
+      if (fadeInRef1.current) observer.unobserve(fadeInRef1.current);
+      if (fadeInRef2.current) observer.unobserve(fadeInRef2.current);
+    };
+  }, []);
+
   return (
     <>
       <div className={styles.page1}>
@@ -140,7 +193,8 @@ function LandingPage() {
         </div>
         <div className={styles.main}>
           <div className={styles.info}>
-            <p className={styles.slogan}>Play for the <span id={styles.distinguish}>Planet</span></p>
+            <p className={styles.slogan}>Play for {" "}
+            <span id={styles.distinguish}><ReactTyped strings={phrases} typeSpeed={150} backSpeed={50} showCursor={false} loop /></span></p>
             <p className={styles.infoText}>
               Welcome to GreenRoulette, where every spin is a chance to win and 
               an opportunity to help. At GreenRoulette, we believe in entertainment 
@@ -161,8 +215,8 @@ function LandingPage() {
           </div>
         </div>
       </div>
-      <div className={styles.page2} ref={page2Ref}>
-        <div className={styles.cardContainer}>
+      <div className={`${styles.page2} ${page2Visible ? styles.fadeIn : ''}`} ref={page2Ref}>
+        <div className={styles.cardContainer} ref={fadeInRef1}>
           <div className={`${styles.cards} ${animate ? styles.goLeftAnimation : ''}`}>
             {cards.map(card => (
               <Card logo={card.logo} alt={card.alt} description={card.description} fontSize={card.fontSize} black={card.black} />
@@ -188,10 +242,10 @@ function LandingPage() {
         </span>
         </div>
       </div>
-      <div className={styles.page3} ref={page3Ref}>
+      <div className={`${styles.page3} ${page3Visible ? styles.fadeIn : ''}`} ref={page3Ref}>
         <h1 className={styles.sectionHeader} style={{color: 'white'}}><span id={styles.topDonator}>Top Donators</span> and <span id={styles.champion}>Champions</span></h1>
         
-        <span className={styles.leaderboardText}>
+        <span className={styles.leaderboardText} ref={fadeInRef2}>
           Explore the GreenRoulette Leaderboards to see the community's top contributors and winners. 
           Whether it's the highest donations or the most successful spins, this is where our most dedicated 
           players shine. Join the ranks, make your mark, and see how you compare to the best!
