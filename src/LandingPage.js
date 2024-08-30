@@ -194,7 +194,7 @@ function LandingPage() {
         <div className={styles.main}>
           <div className={styles.info}>
             <p className={styles.slogan}>Play for {" "}
-            <span id={styles.distinguish}><ReactTyped strings={phrases} typeSpeed={150} backSpeed={50} showCursor={false} loop /></span></p>
+            <span id={styles.distinguish}><ReactTyped strings={phrases} typeSpeed={150} backSpeed={50} backDelay={3000} showCursor={false} loop /></span></p>
             <p className={styles.infoText}>
               Welcome to GreenRoulette, where every spin is a chance to win and 
               an opportunity to help. At GreenRoulette, we believe in entertainment 
@@ -216,19 +216,22 @@ function LandingPage() {
         </div>
       </div>
       <div className={`${styles.page2} ${page2Visible ? styles.fadeIn : ''}`} ref={page2Ref}>
-        <div className={styles.cardContainer} ref={fadeInRef1}>
-          <div className={`${styles.cards} ${animate ? styles.goLeftAnimation : ''}`}>
-            {cards.map(card => (
-              <Card logo={card.logo} alt={card.alt} description={card.description} fontSize={card.fontSize} black={card.black} />
-            ))}
+        <div className={styles.wrapper}>
+          <div className={styles.cardContainer} ref={fadeInRef1}>
+            <div className={styles.cardWrapper}>
+              <div className={`${styles.cards} ${animate ? styles.goLeftAnimation : ''}`}>
+                {cards.map(card => (
+                  <Card logo={card.logo} alt={card.alt} description={card.description} fontSize={card.fontSize} black={card.black} />
+                ))}
+              </div>
+            </div>
+            <CountdownCircle duration={10000} onReset={updateCards} />
+            <MiddleCoin className={styles.middleCoin2}/>
+            <FrontCoin className={styles.frontCoin2}/>
+            <Hearts className={styles.hearts2}/>
           </div>
-          <CountdownCircle duration={10000} onReset={updateCards} />
         </div>
-        <div className={styles.elements2}>
-          <MiddleCoin className={styles.middleCoin2}/>
-          <FrontCoin className={styles.frontCoin2}/>
-          <Hearts className={styles.hearts2}/>
-        </div>
+
         <div className={styles.charitySectionInfo}>
           <h1 className={styles.sectionHeader}>Our Partners for Change</h1>
           <span className={styles.infoText} style={{fontSize: '20px'}}>
