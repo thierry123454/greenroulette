@@ -6,6 +6,8 @@ import styles from './OutcomeComponent.module.css';
 import io from 'socket.io-client';
 
 import CountUp from 'react-countup';
+import Confetti from 'react-confetti';  // Import the Confetti component
+import { useWindowSize } from 'react-use';  // Import hook to get window size
 
 // Initialize socket connection
 const socket = io('https://localhost:3001', { secure: true });
@@ -17,7 +19,7 @@ const roundTwoDecimals = (number) => {
   return Math.round((number + Number.EPSILON) * 100) / 100
 };
 
-function TransactionComponent() {
+function OutcomeComponent() {
   const navigate = useNavigate();
   const { gameState, setGameState } = useContext(GameContext);
   const [isLoaded, setIsLoaded] = useState(false); // State to track loading
@@ -25,6 +27,7 @@ function TransactionComponent() {
   const [totalDonated, setTotalDonated] = useState(0); // State to track loading
   const [playerWon, setTotalPlayerWon] = useState(0); // State to track loading
   const [outcome, setOutcome] = useState(null);
+  const { width, height } = useWindowSize();  // Get window size for Confetti
 
   useEffect(() => {
     setIsLoaded(true); // Set to true when component mounts
@@ -99,6 +102,7 @@ function TransactionComponent() {
 
   return (
     <div className={`${commonStyles.container} ${isLoaded ? commonStyles.loaded : ''}`}>
+      {outcome === 0 && <Confetti width={width} height={height} />} 
       <div className={`${commonStyles.content} ${styles.content}`}>
         <h1 id={styles.header} className={`${outcome == 0 ? styles.bright : styles.sad}`}>
           {outcome == 0 ? "CONGRATULATIONS!" : (outcome == 1 ? "TRY AGAIN!" : "NO BET DETECTED!")}
@@ -128,4 +132,4 @@ function TransactionComponent() {
   );
 }
 
-export default TransactionComponent;
+export default OutcomeComponent;

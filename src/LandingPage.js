@@ -198,7 +198,7 @@ function LandingPage() {
             <p className={styles.infoText}>
               Welcome to GreenRoulette, where every spin is a chance to win and 
               an opportunity to help. At GreenRoulette, we believe in entertainment 
-              that cares. That's why we commit <b>75%</b> of all profits to support various 
+              that cares. That's why we commit <b>75%</b> of all profits to support various 
               charities. With <span className={styles.donationAmount}>${parseFloat(totalDonated)}</span> already donated, join us in our mission to give 
               back. Ready to place your bets?
             </p>

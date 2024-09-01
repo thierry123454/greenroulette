@@ -9,6 +9,7 @@ import metamaskLogo from'./images/metamask.png';
 import rouletteContractAbi from './abis/rouletteContractAbi.json';
 import detectEthereumProvider from '@metamask/detect-provider';
 import axios from 'axios';
+import Confetti from 'react-confetti';
 
 import { ReactComponent as Check } from './images/check.svg'
 import { ReactComponent as Donate } from './images/donate.svg'
@@ -45,6 +46,9 @@ function BettingComponent({ web3, isChatOpen, setIsChatOpen, userAddress }) {
   const [donationAmount, setDonationAmount] = useState('');
   const [isAnonymous, setIsAnonymous] = useState(false);
   const [groupedDonations, setGroupedDonations] = useState({});
+
+  const [confettiActive, setConfettiActive] = useState(false);
+  const [fadeOutConfetti, setFadeOutConfetti] = useState(false);
 
   const contract = new web3.eth.Contract(rouletteContractAbi, contractAddress);
 
@@ -244,7 +248,13 @@ function BettingComponent({ web3, isChatOpen, setIsChatOpen, userAddress }) {
         donationDate: new Date().toISOString().slice(0, 10)  // YYYY-MM-DD format
       });
 
-      setDonationMessage("Thank you so much for you donation!")
+      setDonationMessage("Thank you so much for your donation!");
+      setConfettiActive(true);
+      
+      setTimeout(() => {
+        setFadeOutConfetti(true);
+        setTimeout(() => {setFadeOutConfetti(false); setConfettiActive(false);}, 2000);
+      }, 5000);
 
     } catch (error) {
       console.error('Error donating:', error);
@@ -363,6 +373,13 @@ function BettingComponent({ web3, isChatOpen, setIsChatOpen, userAddress }) {
         <div className={`${styles.settingsContent}`}>
           {isDonation ? 
             <>
+              {
+              confettiActive &&
+                <div className={`${styles.confettiContainer} ${fadeOutConfetti ? styles.fadeOut : ''}`}>
+                  {<Confetti width={300} height={320} />}
+                </div>
+              }
+
               <h1 className={styles.settingsHeaderText} style={{marginTop: '10px'}}>Donate</h1>
               <span>
                 {donationMessage}
