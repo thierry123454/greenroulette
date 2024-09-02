@@ -50,6 +50,7 @@ let stage = 0; // Stage control: 0 - Initial, 1 - Waiting for Closure, 2 - Waiti
 let outcome = -1;
 let globalRandomNumber = -1;
 let lastRandomTimestamp = -1;
+let playerCount = 0;
 
 const fetch = require('node-fetch');
 let currentEthPrice = -1;
@@ -104,6 +105,42 @@ function emitInfo(countdown, stage) {
     total_red: totalRed,
     total_black: totalBlack
   });
+}
+
+function waitForPlayers () {
+  const countdown = setInterval(() => {
+    console.log("Waiting for players...")
+
+    if (playerCount >= 1) {
+      console.log("Players detected!");
+      openBetting();
+      stage = 0;
+      stageOneTimer = 100;
+      secondaryTimer = 125;
+      outcome = -1;
+      startStageOne();
+      clearInterval(countdown);
+      return;
+    }
+  }, 1000);
+}
+
+function noBets() {
+  let timer = 10;
+
+  const countdown = setInterval(() => {
+    console.log("No bets detected. Resetting!")
+
+    if (playerCount >= 1 && timer <= 0) {
+      waitForPlayers();
+      clearInterval(countdown);
+      return;
+    }
+
+    timer -=1;
+
+    emitInfo(timer, -1);
+  }, 1000);
 }
 
 function startStageOne() {
@@ -200,10 +237,16 @@ function startSecondaryTimer() {
 
       if (secondaryTimer <= 0) {
         console.log("Stage is 1 and betting has closed. Fetching RN.")
-        clearInterval(secondaryCountdown);
-        lastRandomNumber = null;
-        fetchRandomNumberUntilChange();
-        stage = 2;
+
+        if (lastCheckedIndex == 0) {
+          noBets();
+        } else {
+          clearInterval(secondaryCountdown);
+          lastRandomNumber = null;
+          fetchRandomNumberUntilChange();
+          stage = 2;
+        }
+
         return;
       }
       emitInfo(secondaryTimer, 1);
@@ -257,10 +300,16 @@ async function prepareForPayout(randomNumber) {
     if (stageThreeTimer <= 0) {
       console.log("Stage 3 ended.");
       clearInterval(countdown);
-      stage = 0;
-      stageOneTimer = 100;
-      startStageOne(); // Restart stage one
-      outcome = -1;
+
+      if (playerCount >= 1) {
+        stage = 0;
+        stageOneTimer = 100;
+        startStageOne(); // Restart stage one
+        outcome = -1;
+      } else {
+        waitForPlayers();
+      }
+
       return;
     }
     stageThreeTimer--;
@@ -275,9 +324,11 @@ async function openBettingAtFourty() {
 
 async function openBetting() {
   try {
-    const tx = await rouletteContract.methods.openBetting().send({ from: account.address });
-    console.log('Betting opened:', tx);
-    checkBettingClosed();
+    if (playerCount >= 1) {
+      const tx = await rouletteContract.methods.openBetting().send({ from: account.address });
+      console.log('Betting opened:', tx);
+      checkBettingClosed();
+    }
   } catch (error) {
     console.error('Failed to open betting:', error);
   }
@@ -330,8 +381,8 @@ async function fetchRandomNumber() {
 }
 
 // Start the initial stage as soon as the server starts
-openBetting();
-startStageOne();
+// waitForPlayers();
+noBets();
 
 // payoutWinners(0);
 
@@ -340,6 +391,7 @@ startStageOne();
 // Handling a new connection
 io.on('connection', (socket) => {
   console.log('New client connected');
+  playerCount += 1;
   
   if (stage == 0) {
     emitInfo(stageOneTimer, 0);
@@ -353,6 +405,7 @@ io.on('connection', (socket) => {
 
   socket.on('disconnect', () => {
     console.log('Client disconnected');
+    playerCount -= 1;
   });
 });
 

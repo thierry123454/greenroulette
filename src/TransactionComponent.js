@@ -90,7 +90,7 @@ function TransactionComponent() {
       setSpecialStyle(true);
     }
 
-    if (gameState.stage == 1 || gameState.stage == 2){ 
+    if (gameState.stage == -1 || gameState.stage == 1 || gameState.stage == 2){ 
       setIsLoaded(true);
     }
 
@@ -135,13 +135,14 @@ function TransactionComponent() {
             <div className={`${commonStyles.status} ${styles.status}`}>
               <span className={commonStyles.label}>Status</span>
               <div id={styles.status_text} className={`${commonStyles.info_text} ${styles.info_text} ${specialStyle ? styles.special : ''}`}>Finalizing Transactions</div>
-              <div id={styles.status_text_overlay} className={`${commonStyles.info_text} ${styles.info_text} ${specialStyle ? styles.special : ''}`}>Fetching Random Number</div>
+              <div id={styles.status_text_overlay} className={`${commonStyles.info_text} ${styles.info_text} ${specialStyle ? styles.special : ''}`}>
+                {gameState.stage === 2 || gameState.stage === 3 ? "Fetching Random Number" : "No bets! Resetting."}
+              </div>
             </div>
             <hr className={commonStyles.line} />
             <div className={`${commonStyles.timer} ${styles.timer}`}>
               <span className={commonStyles.label}>Timer</span>
-              <div className={`${styles.countdown} ${commonStyles.info_text} ${specialStyle ? styles.special : ''}`}>{gameState.timer}</div>
-              <div className={`${styles.countdown} ${commonStyles.info_text} ${specialStyle ? styles.specialOverlay : ''}`}>{timeLeft}</div>
+              <div className={`${styles.countdown} ${commonStyles.info_text}`}>{gameState.stage === 1 || gameState.stage == -1 ? (gameState.timer > 120 ? 0 : gameState.timer) : timeLeft}</div>
             </div>
         </div>
         <div id={styles.spinner}>

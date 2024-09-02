@@ -85,16 +85,10 @@
   
   transition: opacity 1s ease-in-out;
 
+  opacity: 1;
+
   -webkit-background-clip: text;
   -webkit-text-stroke: 3px transparent;
-}
-
-.countdown.special {
-  opacity: 0;
-}
-
-.countdown.specialOverlay {
-  opacity: 1;
 }
 
 #spinner {
