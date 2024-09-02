@@ -18,6 +18,7 @@ function TransactionComponent() {
   const [specialStyle, setSpecialStyle] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false); // State to track loading
   const [finishStatus, setfinishStatus] = useState(false);
+  const [timeLeft, setTimeLeft] = useState('0'); // Timer state for stage 2
 
   const onBackButtonEvent = (e) => {
     e.preventDefault();
@@ -83,7 +84,7 @@ function TransactionComponent() {
   }, [setGameState, navigate]); // Removed gameState from the dependency array
 
   useEffect(() => {
-    if (gameState.timer > 1 && gameState.stage == 1) {
+    if (gameState.stage == 1) {
       setSpecialStyle(false);
     } else {
       setSpecialStyle(true);
@@ -93,11 +94,36 @@ function TransactionComponent() {
       setIsLoaded(true);
     }
 
-    if (gameState.stage === 3) { // Example stage check, adjust based on your game logic
+    if (gameState.stage === 3) {
       setIsLoaded(false);
       setTimeout(() => navigate('/roulette'), 1000);
     }
   }, [gameState, navigate]);
+
+  useEffect(() => {
+    let timerInterval;
+    if (gameState.stage === 2 && gameState.timer) {
+      // Start the timer interval when in stage 2
+      timerInterval = setInterval(() => {
+        const currentTime = Math.floor(Date.now() / 1000); // Current UNIX time
+        const timeRemaining = gameState.timer + 150 - currentTime; // Calculate remaining time
+        console.log(gameState.timer);
+        console.log(currentTime);
+
+        if (timeRemaining <= 0) {
+          setTimeLeft("0");
+          clearInterval(timerInterval);
+        } else {
+          setTimeLeft(`${timeRemaining}`);
+        }
+      }, 1000); // Update every second
+    } else {
+      setTimeLeft('0'); // Default display for other stages
+    }
+
+    // Cleanup interval on unmount or when the stage changes
+    return () => clearInterval(timerInterval);
+  }, [gameState.stage, gameState.timer]);
 
   return (
     <div className={`${commonStyles.container} ${isLoaded ? commonStyles.loaded : ''}`}>
@@ -114,8 +140,8 @@ function TransactionComponent() {
             <hr className={commonStyles.line} />
             <div className={`${commonStyles.timer} ${styles.timer}`}>
               <span className={commonStyles.label}>Timer</span>
-              <div id={styles.timer} className={`${commonStyles.info_text} ${specialStyle ? styles.special : ''}`}>{gameState.timer}</div>
-              <div id={styles.timer_overlay} className={`${commonStyles.info_text} ${specialStyle ? styles.special : ''}`}>±10-90</div>
+              <div className={`${styles.countdown} ${commonStyles.info_text} ${specialStyle ? styles.special : ''}`}>{gameState.timer}</div>
+              <div className={`${styles.countdown} ${commonStyles.info_text} ${specialStyle ? styles.specialOverlay : ''}`}>{timeLeft}</div>
             </div>
         </div>
         <div id={styles.spinner}>

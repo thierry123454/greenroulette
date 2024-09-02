@@ -49,6 +49,7 @@ let lastRandomNumber = null;
 let stage = 0; // Stage control: 0 - Initial, 1 - Waiting for Closure, 2 - Waiting for RN, 3 - Payout and Reopen
 let outcome = -1;
 let globalRandomNumber = -1;
+let lastRandomTimestamp = -1;
 
 const fetch = require('node-fetch');
 let currentEthPrice = -1;
@@ -225,7 +226,7 @@ async function fetchRandomNumberUntilChange() {
       prepareForPayout(Number(currentRandomNumber % BigInt(37)));
     }
   
-    emitInfo(-1, 2);
+    emitInfo(lastRandomTimestamp, 2);
   } catch (error) {
     console.error('Error fetching random number:', error);
   }
@@ -320,6 +321,8 @@ async function fetchRandomNumber() {
     console.log("Is it secure", isSecure);
     console.log("Creation timestamp is", timestamp);
 
+    lastRandomTimestamp = Number(timestamp);
+
     if (isSecure)
       return randomBigNumber;
 
@@ -332,6 +335,8 @@ startStageOne();
 
 // payoutWinners(0);
 
+// fetchRandomNumberUntilChange();
+
 // Handling a new connection
 io.on('connection', (socket) => {
   console.log('New client connected');
@@ -341,7 +346,7 @@ io.on('connection', (socket) => {
   } else if (stage == 1) {
     emitInfo(secondaryTimer, 1);
   } else if (stage == 2) {
-    emitInfo(-1, 2);
+    emitInfo(lastRandomTimestamp, 2);
   } else {
     io.emit('timer', { countdown: stageThreeTimer, stage: 3, exchange: currentEthPrice, game_outcome: globalRandomNumber, total_red: totalRed, total_black: totalBlack });
   }

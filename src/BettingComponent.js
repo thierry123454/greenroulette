@@ -10,6 +10,7 @@ import rouletteContractAbi from './abis/rouletteContractAbi.json';
 import detectEthereumProvider from '@metamask/detect-provider';
 import axios from 'axios';
 import Confetti from 'react-confetti';
+import { motion } from 'framer-motion';
 
 import { ReactComponent as Check } from './images/check.svg'
 import { ReactComponent as Donate } from './images/donate.svg'
@@ -24,7 +25,7 @@ const database_api = axios.create({
   baseURL: 'http://localhost:6969/'
 });
 
-function BettingComponent({ web3, isChatOpen, setIsChatOpen, userAddress }) {
+function BettingComponent({ web3, isChatOpen, setIsChatOpen, userAddress, unreadCounter }) {
   const [betAmount, setBetAmount] = useState('');
   const [ethAmount, setEthAmount] = useState('');
   const [ethAmountDonation, setEthAmountDonation] = useState('');
@@ -194,6 +195,7 @@ function BettingComponent({ web3, isChatOpen, setIsChatOpen, userAddress }) {
 
   // Toggle chat visibility
   const toggleSettings = () => {
+    console.log(unreadCounter);
     setIsSettingsOpen(!isSettingsOpen);
     setShowDonations(false);
   };
@@ -313,6 +315,11 @@ function BettingComponent({ web3, isChatOpen, setIsChatOpen, userAddress }) {
           </clipPath>
           </defs>
         </svg>
+        {unreadCounter > 0 && (
+          <span className={styles.unreadBadge}>
+            {unreadCounter}
+          </span>
+        )}
       </button>
 
       <button onClick={toggleSettings} className={`${styles.sideBtn} ${styles.settingBtn} ${isSettingsOpen ? styles.hidden : ''}`}>
@@ -420,7 +427,11 @@ function BettingComponent({ web3, isChatOpen, setIsChatOpen, userAddress }) {
                     <React.Fragment key={date}>
                       <span className={commonStyles.label}>{date}</span>
                       {donations.map((donation, index) => (
-                        <div key={index} className={commonStyles.entry}>
+                        <motion.div key={index} className={commonStyles.entry}
+                        initial={{ opacity: 0, translateY: 10 }}
+                        animate={{ opacity: 1, translateY: 0 }}
+                        transition={{ duration: 0.4, delay: index * 0.1 }}
+                        >
                           <span>
                             {donation.user_address ? 
                             (donation.username ? donation.username : 
@@ -430,7 +441,7 @@ function BettingComponent({ web3, isChatOpen, setIsChatOpen, userAddress }) {
                           <span className={commonStyles.entryAmount}>
                             ${parseFloat(donation.donation_amount).toFixed(2)}
                           </span>
-                        </div>
+                        </motion.div>
                       ))}
                     </React.Fragment>
                   ))}

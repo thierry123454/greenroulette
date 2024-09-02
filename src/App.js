@@ -24,6 +24,7 @@ function App() {
   const [web3, setWeb3] = useState(null); // Maintain web3 state at the App level
   const [userAddress, setUserAddress] = useState('');
   const { gameState, setGameState } = useContext(GameContext);
+  const [unreadCounter, setUnreadCounter] = useState(0);
 
   useEffect(() => {
     let provider;
@@ -71,11 +72,11 @@ function App() {
 
   return (
     <Router>
-      <Chat setIsChatOpen={setIsChatOpen} isChatOpen={isChatOpen} />
+      <Chat setIsChatOpen={setIsChatOpen} isChatOpen={isChatOpen} setUnreadCounter={setUnreadCounter} />
       <Routes>
         <Route path="/" element={<LandingPage />} />
         <Route path="/getting-started" element={<GettingStarted setWeb3={setWeb3} setUserAddress={setUserAddress} />} />
-        <Route path="/betting" element={<BettingComponent web3={web3} setIsChatOpen={setIsChatOpen} isChatOpen={isChatOpen} userAddress={userAddress} />} />
+        <Route path="/betting" element={<BettingComponent web3={web3} setIsChatOpen={setIsChatOpen} isChatOpen={isChatOpen} userAddress={userAddress} unreadCounter={unreadCounter} setUnreadCounter={setUnreadCounter} />} />
         <Route path="/transactions" element={<TransactionComponent />} />
         <Route path="/roulette" element={<RouletteComponent />} />
         <Route path="/outcome" element={<OutcomeComponent />} />

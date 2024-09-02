@@ -3,6 +3,7 @@ import React, { useEffect, useState, useCallback, useRef } from 'react';
 import styles from './LandingPage.module.css'; // Import CSS module for styles
 import commonStyles from './CommonStyles.module.css'; // Import CSS module for styles
 import { useNavigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import { ReactComponent as Logo } from './images/logo.svg';
 import { ReactComponent as BackCoin } from './images/landing_visual/Back_Coin.svg';
 import { ReactComponent as Earth } from './images/landing_visual/Earth.svg';
@@ -254,7 +255,7 @@ function LandingPage() {
           players shine. Join the ranks, make your mark, and see how you compare to the best!
         </span>
         
-        <div className={styles.leaderboards}>
+       {page3Visible && <div className={styles.leaderboards}>
           <div className={`${commonStyles.popUpContainer} ${styles.leaderboard}`}>
               <div className={`${commonStyles.popUpHeader} ${styles.leaderboardHeader}`}>
                 <span className={styles.leaderboardHeaderText}>Top Donators 🌍</span>
@@ -263,7 +264,11 @@ function LandingPage() {
               {topDonators.map((donator, index) => (
                 <>
                   {index <= 2 &&
-                    <div className={styles.topEntry}>
+                    <motion.div className={styles.topEntry}
+                    initial={{ opacity: 0, translateY: 20 }}
+                    animate={{ opacity: 1, translateY: 0 }}
+                    transition={{ duration: 0.6, delay: index * 0.2 }}
+                    >
                       {index === 0 ? <Medal1 className={styles.medal} /> :
                       index === 1 ? <Medal2 className={styles.medal} /> :
                       index === 2 ? <Medal3 className={styles.medal} /> : null}
@@ -278,7 +283,7 @@ function LandingPage() {
                           <img src={ethereumLogo} alt="ETH" className={styles.ethLogo} />
                         </span>
                       </div>
-                    </div>
+                    </motion.div>
                   }
                 </>
               ))}
@@ -289,7 +294,11 @@ function LandingPage() {
                 {
                   index > 2 &&
                   <>
-                    <div className={`${commonStyles.entry} ${styles.entry}`}>
+                    <motion.div className={`${commonStyles.entry} ${styles.entry}`}
+                    initial={{ opacity: 0, translateY: 20 }}
+                    animate={{ opacity: 1, translateY: 0 }}
+                    transition={{ duration: 0.6, delay: 0.5 + index * 0.2 }}
+                    >
                       <span>
                         {index + 1}. {donator.username ? donator.username : 
                         (donator.address.substring(0, 6) + '...' + donator.address.substring(donator.address.length - 4))}
@@ -298,7 +307,7 @@ function LandingPage() {
                         {parseFloat(donator.total_donated)}
                         <img src={ethereumLogo} alt="ETH" className={styles.ethLogo} />
                       </span>
-                    </div>
+                    </motion.div>
                   </>
                 }
                 </>
@@ -314,7 +323,11 @@ function LandingPage() {
               {topWinners.map((winner, index) => (
                 <>
                   {index <= 2 &&
-                    <div className={styles.topEntry}>
+                    <motion.div className={styles.topEntry}
+                    initial={{ opacity: 0, translateY: 20 }}
+                    animate={{ opacity: 1, translateY: 0 }}
+                    transition={{ duration: 0.6, delay: index * 0.2 }}
+                    >
                       {index === 0 ? <Medal1 className={styles.medal} /> :
                       index === 1 ? <Medal2 className={styles.medal} /> :
                       index === 2 ? <Medal3 className={styles.medal} /> : null}
@@ -329,7 +342,7 @@ function LandingPage() {
                           <img src={ethereumLogo} alt="ETH" className={styles.ethLogo} />
                         </span>
                       </div>
-                    </div>
+                    </motion.div>
                   }
                 </>
               ))}
@@ -340,7 +353,11 @@ function LandingPage() {
                 {
                   index > 2 &&
                   <>
-                    <div className={`${commonStyles.entry} ${styles.entry}`}>
+                    <motion.div className={`${commonStyles.entry} ${styles.entry}`}
+                    initial={{ opacity: 0, translateY: 20 }}
+                    animate={{ opacity: 1, translateY: 0 }}
+                    transition={{ duration: 0.6, delay: 0.5 + index * 0.2 }}
+                    >
                       <span>
                         {index + 1}. {winner.username ? winner.username : 
                         (winner.address.substring(0, 6) + '...' + winner.address.substring(winner.address.length - 4))}
@@ -349,14 +366,14 @@ function LandingPage() {
                         {parseFloat(winner.total_win)}
                         <img src={ethereumLogo} alt="ETH" className={styles.ethLogo} />
                       </span>
-                    </div>
+                    </motion.div>
                   </>
                 }
                 </>
               ))}
               </div>
           </div>
-        </div>
+        </div>}
       </div>
       <div className={styles.footbar}>
         <Logo />

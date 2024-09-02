@@ -26,7 +26,7 @@ const roundTwoDecimals = (number) => {
   return Math.round((number + Number.EPSILON) * 100) / 100
 };
 
-function Chat({ setIsChatOpen, isChatOpen }) {
+function Chat({ setIsChatOpen, isChatOpen, setUnreadCounter }) {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
   const { gameState } = useContext(GameContext);
@@ -57,6 +57,8 @@ function Chat({ setIsChatOpen, isChatOpen }) {
 
   useEffect(() => {
     socket.on('message', message => {
+      if (!isChatOpen) setUnreadCounter(prevCounter => prevCounter + 1);
+
       setMessages(prev => [...prev, message]);
       console.log(messages);
     });
@@ -119,6 +121,7 @@ function Chat({ setIsChatOpen, isChatOpen }) {
   };
 
   const handleCloseChat = () => {
+    setUnreadCounter(0);
     setIsChatOpen(false);
   };
 
