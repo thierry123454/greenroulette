@@ -238,10 +238,11 @@ function startSecondaryTimer() {
       if (secondaryTimer <= 0) {
         console.log("Stage is 1 and betting has closed. Fetching RN.")
 
+        clearInterval(secondaryCountdown);
+        
         if (lastCheckedIndex == 0) {
           noBets();
         } else {
-          clearInterval(secondaryCountdown);
           lastRandomNumber = null;
           fetchRandomNumberUntilChange();
           stage = 2;
@@ -293,7 +294,7 @@ async function prepareForPayout(randomNumber) {
   globalRandomNumber = randomNumber;
   outcome = convertRandomNumber(randomNumber);
   payoutWinners(outcome);
-  openBettingAtFourty(); // Open betting 40 seconds into stage 3
+  // openBettingAtFourty(); // Open betting 40 seconds into stage 3
 
   const countdown = setInterval(() => {
     getEthPrice();
@@ -304,6 +305,7 @@ async function prepareForPayout(randomNumber) {
       if (playerCount >= 1) {
         stage = 0;
         stageOneTimer = 100;
+        openBetting();
         startStageOne(); // Restart stage one
         outcome = -1;
       } else {
@@ -324,11 +326,9 @@ async function openBettingAtFourty() {
 
 async function openBetting() {
   try {
-    if (playerCount >= 1) {
-      const tx = await rouletteContract.methods.openBetting().send({ from: account.address });
-      console.log('Betting opened:', tx);
-      checkBettingClosed();
-    }
+    const tx = await rouletteContract.methods.openBetting().send({ from: account.address });
+    console.log('Betting opened:', tx);
+    checkBettingClosed();
   } catch (error) {
     console.error('Failed to open betting:', error);
   }
