@@ -381,11 +381,10 @@ async function fetchRandomNumber() {
 }
 
 // Start the initial stage as soon as the server starts
-// waitForPlayers();
-noBets();
+waitForPlayers();
 
+// noBets();
 // payoutWinners(0);
-
 // fetchRandomNumberUntilChange();
 
 // Handling a new connection
