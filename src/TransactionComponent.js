@@ -84,19 +84,29 @@ function TransactionComponent() {
   }, [setGameState, navigate]); // Removed gameState from the dependency array
 
   useEffect(() => {
-    if (gameState.stage == 1) {
-      setSpecialStyle(false);
-    } else {
-      setSpecialStyle(true);
-    }
-
-    if (gameState.stage == -1 || gameState.stage == 1 || gameState.stage == 2){ 
-      setIsLoaded(true);
-    }
-
-    if (gameState.stage === 3) {
-      setIsLoaded(false);
-      setTimeout(() => navigate('/roulette'), 1000);
+    switch (gameState.stage) {
+      case 0:
+        navigate('/betting');
+        break;
+      case 1:
+        setSpecialStyle(false);
+        setIsLoaded(true);
+        break;
+      case -1:
+      case 2:
+        setSpecialStyle(true);
+        setIsLoaded(true);
+        break;
+      case 3:
+        if (!isLoaded) {
+          navigate('/roulette');
+        } else {
+          setIsLoaded(false);
+          setTimeout(() => navigate('/roulette'), 1000);
+        }
+        break;
+      default:
+        break;
     }
   }, [gameState, navigate]);
 

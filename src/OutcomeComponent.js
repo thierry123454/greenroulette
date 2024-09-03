@@ -52,8 +52,17 @@ function OutcomeComponent() {
       setIsLoaded(false);
     }
 
-    if (gameState.stage == 0) {
-      navigate('/')
+    switch (gameState.stage) {
+      case 0:
+        navigate('/betting');
+        break;
+      case -1:
+      case 1:
+      case 2:
+        navigate('/transactions');
+        break;
+      default:
+        break;
     }
   }, [gameState, navigate]);
 

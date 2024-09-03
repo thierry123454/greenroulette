@@ -103,6 +103,19 @@ function RouletteComponent() {
   }, [setGameState, navigate]); // Removed gameState from the dependency array
 
   useEffect(() => {
+    switch (gameState.stage) {
+      case 0:
+        navigate('/betting')
+        break;
+      case -1:
+      case 1:
+      case 2:
+        navigate('/transactions');
+        break;
+      default:
+        break;
+    }
+
     if (gameState.timer >= 21) { // Starting the spinning
       const newTransformX = calculateTransform(gameState.outcome);
       setTransformX(newTransformX);

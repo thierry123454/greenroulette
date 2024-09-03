@@ -134,27 +134,46 @@ function BettingComponent({ web3, isChatOpen, setIsChatOpen, userAddress, unread
   useEffect(() => {
     const timerHandler = (data) => {
       console.log('Timer data received:', data);
-      setGameState(prevState => ({ ...prevState, timer: data.countdown, stage: data.stage, exchange: data.exchange, total_red: data.total_red, total_black: data.total_black }));
-
-      // Check navigation condition immediately after state update
-      if (data.stage != 0) {
-        console.log("Navigating to transactions due to stage 1.");
-        navigate('/transactions');
-      } else {
-        setGameState(prevState => ({
-          ...prevState,
-          has_visited_bet: true
-        }));
+      
+      // Update game state based on received data
+      setGameState(prevState => ({ 
+        ...prevState, 
+        timer: data.countdown, 
+        stage: data.stage, 
+        exchange: data.exchange, 
+        total_red: data.total_red, 
+        total_black: data.total_black 
+      }));
+  
+      // Navigation and additional state update based on stage
+      switch (data.stage) {
+        case 0:
+          setGameState(prevState => ({
+            ...prevState,
+            has_visited_bet: true
+          }));
+          break;
+        case -1:
+        case 1:
+        case 2:
+          navigate('/transactions');
+          break;
+        case 3:
+          navigate('/roulette');
+          break;
+        default:
+          break;
       }
     };
-
+  
     // Listen for timer updates from server
     socket.on('timer', timerHandler);
-
+  
+    // Cleanup function to remove the listener when the component is unmounted or dependencies change
     return () => {
       socket.off('timer', timerHandler);
     };
-  }, [setGameState, navigate]); // Removed gameState from the dependency array
+  }, [setGameState, navigate]);
 
   // Change styles according to state
   useEffect(() => {
@@ -164,10 +183,6 @@ function BettingComponent({ web3, isChatOpen, setIsChatOpen, userAddress, unread
       setIsLoaded(false);
     } else {
       setSpecialStyle(false);
-    }
-
-    if (gameState.stage === 1) {
-      navigate('/transactions');
     }
   }, [gameState, navigate, isLoaded]);
 
