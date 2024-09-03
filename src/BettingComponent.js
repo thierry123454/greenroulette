@@ -1,8 +1,8 @@
 import React, { useContext, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { GameContext } from './GameContext';
-import commonStyles from './CommonStyles.module.css';
 import styles from './BettingComponent.module.css';
+import commonStyles from './CommonStyles.module.css';
 import Logo from './Logo';
 import io from 'socket.io-client';
 import metamaskLogo from'./images/metamask.png';

@@ -182,6 +182,17 @@ function LandingPage() {
     };
   }, []);
 
+  const [showTopDonators, setShowTopDonators] = useState(true); // State to toggle leaderboards
+
+  // Effect to toggle leaderboards every 10 seconds on small screens
+  useEffect(() => {
+    const toggleInterval = setInterval(() => {
+      setShowTopDonators((prev) => !prev); // Toggle state
+    }, 5000); // 5 seconds
+
+    return () => clearInterval(toggleInterval); // Clean up interval on unmount
+  }, []);
+
   return (
     <>
       <div className={styles.page1}>
@@ -235,7 +246,7 @@ function LandingPage() {
 
         <div className={styles.charitySectionInfo}>
           <h1 className={styles.sectionHeader}>Our Partners for Change</h1>
-          <span className={styles.infoText} style={{fontSize: '20px'}}>
+          <span id={styles.charityInfo} className={styles.infoText}>
             We want to make a difference with every
             spin. That's why we are proud to partner with a diverse range of 
             non-profit organizations dedicated to creating a better world. 
@@ -256,7 +267,11 @@ function LandingPage() {
         </span>
         
        {page3Visible && <div className={styles.leaderboards}>
-          <div className={`${commonStyles.popUpContainer} ${styles.leaderboard}`}>
+          <div className={`${commonStyles.popUpContainer} ${styles.leaderboard}`}
+          style={{
+            opacity: showTopDonators ? 1 : 0,
+            transition: 'opacity 1s', // Add fade transition
+          }}>
               <div className={`${commonStyles.popUpHeader} ${styles.leaderboardHeader}`}>
                 <span className={styles.leaderboardHeaderText}>Top Donators 🌍</span>
               </div>
@@ -315,7 +330,13 @@ function LandingPage() {
               </div>
           </div>
 
-          <div className={`${commonStyles.popUpContainer} ${styles.leaderboard}`}>
+          <div className={`${commonStyles.popUpContainer} ${styles.leaderboard}`}
+          style={{
+            opacity: showTopDonators ? 0 : 1,
+            position: 'relative',
+            left: '-404px',
+            transition: 'opacity 1s', // Add fade transition
+          }}>
               <div className={`${commonStyles.popUpHeader} ${styles.leaderboardHeader} ${styles.winner}`}>
                 <span className={styles.leaderboardHeaderText}>Top Winners 🏆</span>
               </div>

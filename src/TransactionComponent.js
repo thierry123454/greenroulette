@@ -83,6 +83,11 @@ function TransactionComponent() {
     };
   }, [setGameState, navigate]); // Removed gameState from the dependency array
 
+  // Fade-In Animation
+  useEffect(() => {
+    setIsLoaded(true); // Set to true when component mounts
+  }, []);  
+
   useEffect(() => {
     switch (gameState.stage) {
       case 0:
@@ -90,12 +95,10 @@ function TransactionComponent() {
         break;
       case 1:
         setSpecialStyle(false);
-        setIsLoaded(true);
         break;
       case -1:
       case 2:
         setSpecialStyle(true);
-        setIsLoaded(true);
         break;
       case 3:
         if (!isLoaded) {
