@@ -243,7 +243,7 @@
 }
 
 .settingsContainer.settingsOpen {
-  transform: translate(-600px, -120px);
+  transform: translate(-550px, -120px);
 }
 
 .settingsMenuButtons {
@@ -402,3 +402,19 @@
 .confettiContainer.fadeOut {
   opacity: 0;
 }
+
+/* Adjust layout for small screens */
+@media (max-width: 950px) {
+  .settingBtn {
+    display: none;
+  }
+}
+
+
+/* Adjust layout for small screens */
+@media (max-width: 500px) {
+  .openChatBtn {
+    transform: translate(185px, 20px);
+  }
+}
+
