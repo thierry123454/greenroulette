@@ -1,7 +1,7 @@
 const { Web3 } = require('web3');
 const abi_roulette = require('./src/abis/rouletteContractAbi.json');
 const infuraUrl = process.env.INFURA_URL;
-const rouletteContractAddress = "0x9365F09440f8de261A893BCb1112BB75fc4C342e";
+const rouletteContractAddress = "0xDE498a87437214F6862A1f4B46D05817799eBd48";
 const web3 = new Web3(infuraUrl);
 const mysql = require('mysql2/promise');
 

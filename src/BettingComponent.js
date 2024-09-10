@@ -15,7 +15,7 @@ import { motion } from 'framer-motion';
 import { ReactComponent as Check } from './images/check.svg'
 import { ReactComponent as Donate } from './images/donate.svg'
 
-const contractAddress = "0x9365F09440f8de261A893BCb1112BB75fc4C342e";
+const contractAddress = "0xDE498a87437214F6862A1f4B46D05817799eBd48";
 
 // Initialize socket connection
 const socket = io('https://localhost:3001', { secure: true });
