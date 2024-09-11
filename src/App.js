@@ -7,6 +7,7 @@ import RouletteComponent from './RouletteComponent';
 import OutcomeComponent from './OutcomeComponent';
 import LandingPage from './LandingPage';
 import GettingStarted from './GettingStarted';
+import BecomePartner from './BecomePartner';
 
 import Web3 from 'web3';
 import detectEthereumProvider from '@metamask/detect-provider';
@@ -80,6 +81,7 @@ function App() {
         <Route path="/transactions" element={<TransactionComponent />} />
         <Route path="/roulette" element={<RouletteComponent />} />
         <Route path="/outcome" element={<OutcomeComponent />} />
+        <Route path="/become-a-partner" element={<BecomePartner web3={web3} />} />
       </Routes>
     </Router>
   );

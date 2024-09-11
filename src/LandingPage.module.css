@@ -153,13 +153,41 @@ html, body {
 
   border: none;
 
-  transition: color 0.3s ease;
-  transition: -webkit-text-stroke 0.3s ease;
+  transition: transform 0.3s ease;
+  transform: box-shadow 0.3s ease;
 }
 
-#startPlaying:hover{
-  color: #000000;
-  -webkit-text-stroke: 1px #FFFFFF;
+#becomePartner {
+  padding: 8px 16px;
+  margin-top: 20px;
+  margin-left: 20px;
+
+  /* Create a gradient background */
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.25) 0%, rgba(255, 183, 0, 0.25) 100%);
+  
+  /* Remove the box-shadow */
+  box-shadow: 1px 1px 5px rgba(0, 0, 0, 0.25);
+  
+  border-radius: 12px; /* Increased to account for padding */
+
+  font-style: normal;
+  font-weight: 800;
+  font-size: 20px;
+  line-height: 150%;
+
+  color: #FFFFFF;
+  -webkit-text-stroke: 1px #000000;
+
+  border: none;
+  position: relative;
+  
+  transition: transform 0.3s ease;
+  transform: box-shadow 0.3s ease;
+}
+
+#startPlaying:hover, #becomePartner:hover{
+  box-shadow: 1px 1px 10px rgba(0, 0, 0, 0.25);
+  transform: translateY(-2px);
 }
 
 .visual {
@@ -587,6 +615,10 @@ button:hover {
   #startPlaying {
     font-size: 24px;
   }
+
+  #becomePartner {
+    font-size: 24px;
+  }
   
   .elements {
     width: 700px;
@@ -659,6 +691,10 @@ button:hover {
     font-size: 20px;
   }
 
+  #becomePartner {
+    font-size: 20px;
+  }
+
   /* PAGE 2 */
   .page2 {
     flex-direction: column-reverse;
@@ -701,6 +737,10 @@ button:hover {
   }
 
   #startPlaying {
+    font-size: 19px;
+  }
+
+  #becomePartner {
     font-size: 19px;
   }
 
@@ -800,6 +840,11 @@ button:hover {
 
   #startPlaying {
     font-size: 20px;
+  }
+
+  #becomePartner {
+    font-size: 20px;
+    margin-left: 0;
   }
 
   .visual {

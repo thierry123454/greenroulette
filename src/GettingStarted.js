@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, Link, useLocation } from 'react-router-dom';
 import Web3 from 'web3';
 import commonStyles from './CommonStyles.module.css';
 import styles from './GettingStarted.module.css';
@@ -21,6 +21,7 @@ function GettingStarted({ setWeb3, setUserAddress }) {
   const [isSafari, setIsSafari] = useState(false);
 
   const { gameState, setGameState } = useContext(GameContext);
+  const location = useLocation();
 
   const navigate = useNavigate();
 
@@ -58,7 +59,15 @@ function GettingStarted({ setWeb3, setUserAddress }) {
           console.log('Player added successfully');
         }
 
-        navigate('/betting');
+        const params = new URLSearchParams(location.search);
+        const redirectTo = params.get('redirect');
+    
+        if (redirectTo === 'partner') {
+          navigate('/become-a-partner');
+        } else {
+          navigate('/become-a-partner');
+        }
+
       } catch (error) {
         console.error('Failed to connect to MetaMask', error);
       }

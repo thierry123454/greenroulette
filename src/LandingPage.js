@@ -199,6 +199,7 @@ function LandingPage() {
         <div className={styles.header}>
           <Logo />
           <div className={styles.buttonGroup}>
+            <button onClick={() => navigate('/explanation.pdf')}>How it Works 📈</button>
             <button onClick={() => scrollToSection(page2Ref)}>Charities 🌍</button>
             <button onClick={() => scrollToSection(page3Ref)}>Leaderboards 🏆</button>
           </div>
@@ -210,11 +211,12 @@ function LandingPage() {
             <p className={styles.infoText}>
               Welcome to GreenRoulette, where every spin is a chance to win and 
               an opportunity to help. At GreenRoulette, we believe in entertainment 
-              that cares. That's why we commit <b>75%</b> of all profits to support various 
+              that cares. That's why we commit <b>67%</b> of all profits to support various 
               charities. With <span className={styles.donationAmount}>${parseFloat(totalDonated)}</span> already donated, join us in our mission to give 
               back. Ready to place your bets?
             </p>
-            <button id={styles.startPlaying} onClick={() => {navigate('/getting-started')}}>Start Playing 🚀</button>
+            <button id={styles.startPlaying} onClick={() => {navigate('/getting-started?redirect=betting')}}>Start Playing 🚀</button>
+            <button id={styles.becomePartner} onClick={() => {navigate('/getting-started?redirect=partner')}}>Become a Partner 💸</button>
           </div>
           <div className={styles.visual}>
             <div className={styles.elements}>

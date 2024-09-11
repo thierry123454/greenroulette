@@ -26,11 +26,20 @@ const database_api = axios.create({
 });
 
 function BettingComponent({ web3, isChatOpen, setIsChatOpen, userAddress, unreadCounter }) {
+  const navigate = useNavigate();
+
+  // Move this useEffect to the top of your component
+  useEffect(() => {
+    if (!web3) {
+      navigate('/getting-started');
+    }
+  }, [web3, navigate]);
+
   const [betAmount, setBetAmount] = useState('');
   const [ethAmount, setEthAmount] = useState('');
   const [ethAmountDonation, setEthAmountDonation] = useState('');
 
-  const navigate = useNavigate();
+
   const { gameState, setGameState, resetGameState } = useContext(GameContext);
   const [finishStatus, setfinishStatus] = useState(false);
 
@@ -51,7 +60,15 @@ function BettingComponent({ web3, isChatOpen, setIsChatOpen, userAddress, unread
   const [confettiActive, setConfettiActive] = useState(false);
   const [fadeOutConfetti, setFadeOutConfetti] = useState(false);
 
-  const contract = new web3.eth.Contract(rouletteContractAbi, contractAddress);
+  // Move the contract initialization inside a useEffect
+  const [contract, setContract] = useState(null);
+
+  useEffect(() => {
+    if (web3) {
+      const newContract = new web3.eth.Contract(rouletteContractAbi, contractAddress);
+      setContract(newContract);
+    }
+  }, [web3]);
 
   const onBackButtonEvent = (e) => {
     e.preventDefault();
