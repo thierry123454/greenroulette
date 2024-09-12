@@ -5,7 +5,8 @@ CREATE TABLE players (
     address VARCHAR(255) PRIMARY KEY,
     username VARCHAR(255) UNIQUE,
     total_win DECIMAL(18, 8) NOT NULL DEFAULT 0.00000000,  -- accommodating large totals with fine precision
-    total_donated DECIMAL(18, 8) NOT NULL DEFAULT 0.00000000
+    total_donated DECIMAL(18, 8) NOT NULL DEFAULT 0.00000000,
+    partner_contribution DECIMAL(18, 8) NOT NULL DEFAULT 0.00000000,
 );
 
 CREATE TABLE donations (

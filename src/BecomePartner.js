@@ -8,6 +8,7 @@ import { ReactComponent as Logo } from './images/logo.svg';
 import { ReactComponent as Mail } from './images/mail.svg';
 import { ReactComponent as Explanation } from './images/explaination.svg';
 import rouletteContractAbi from './abis/rouletteContractAbi.json';
+import axios from 'axios';
 
 import { Pie } from 'react-chartjs-2';
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js';
@@ -17,14 +18,29 @@ import xLogo from './images/x_logo.png';
 
 const contractAddress = "0xDE498a87437214F6862A1f4B46D05817799eBd48";
 
+// Create an instance of axios with a base URL
+const database_api = axios.create({
+  baseURL: 'http://localhost:6969/'
+});
+
 ChartJS.register(ArcElement, Tooltip, Legend);
 
-function PartnerSharePieChart({ partnerShare }) {
+function PartnerSharePieChart({ userShare }) {
+  const [partners, setPartners] = useState([]);
+
+  useEffect(() => {
+    database_api.get('/api/get_all_partners')
+      .then(response => {
+        setPartners(response.data.partners);
+      })
+      .catch(error => console.error('Error fetching partners:', error));
+  }, []);
+
   const data = {
-    labels: ['You', '0x123...456'],
+    labels: ['You', ...partners.map(partner => partner.address.slice(0, 6) + '...' + partner.address.slice(-4))],
     datasets: [
       {
-        data: [partnerShare, 100 - partnerShare],
+        data: [userShare, ...partners.map(partner => partner.contribution)],
         backgroundColor: function(context) {
           const chart = context.chart;
           const {ctx, chartArea} = chart;
@@ -45,7 +61,7 @@ function PartnerSharePieChart({ partnerShare }) {
             return gradient2;
           }
         },
-        hoverBackgroundColor: ['#FFCF54', '#171717'],
+        hoverBackgroundColor: ['#FFCF54', ...Array(partners.length).fill('#171717')],
       },
     ],
   };
@@ -53,6 +69,17 @@ function PartnerSharePieChart({ partnerShare }) {
   const options = {
     responsive: true,
     maintainAspectRatio: false,
+    tooltips: {
+      callbacks: {
+        label: function(tooltipItem, data) {
+          const dataset = data.datasets[tooltipItem.datasetIndex];
+          const total = dataset.data.reduce((acc, current) => acc + current, 0);
+          const currentValue = dataset.data[tooltipItem.index];
+          const percentage = ((currentValue / total) * 100).toFixed(2);
+          return `${data.labels[tooltipItem.index]}: ${currentValue} ETH (${percentage}%)`;
+        }
+      }
+    }
   };
   
   return <Pie data={data} options={options} />;
@@ -70,13 +97,30 @@ function BecomePartner({ web3 }) {
   }, [web3, navigate]);
 
   const [contributionAmount, setContributionAmount] = useState('');
-  const [partnerShare, setPartnerShare] = useState(0);
+  const [userShare, setUserShare] = useState(0);
+  const [totalPartnerContributions, setTotalPartnerContributions] = useState(0);
+  const [sharePercentage, setSharePercentage] = useState(0);
+  const [estimatedMonthlyEarnings, setEstimatedMonthlyEarnings] = useState(0);
+  const [isAlreadyPartner, setIsAlreadyPartner] = useState(-1);
+
+  useEffect(() => {
+    database_api.get('/api/get_all_partners')
+      .then(response => {
+        const total = response.data.partners.reduce((sum, partner) => sum + partner.contribution, 0);
+        setTotalPartnerContributions(total);
+      })
+      .catch(error => console.error('Error fetching partners:', error));
+  }, []);
+
+  const handleKeyPress = (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault(); // Prevent default form submission behavior
+      calculateEarnings();
+    }
+  };
 
   const handleContributionChange = (e) => {
     setContributionAmount(e.target.value);
-    // Calculate partner share based on contribution amount
-    // This is a placeholder calculation, replace with your actual logic
-    setPartnerShare(parseFloat(e.target.value) * 100 / (0.42 + parseFloat(e.target.value)));
   };
 
   // Move the contract initialization inside a useEffect
@@ -139,12 +183,51 @@ function BecomePartner({ web3 }) {
         value: contributionWei
       });
 
-      alert('Congratulations! You are now a partner.');
-      // Optionally, you can refresh the contract data here
-      fetchContractData();
+      // Update the partner contribution in the database
+      const response = await database_api.post('/api/set_partner_contribution', { 
+        address: account, 
+        contribution: contributionAmount 
+      });
+      if (response.data.message === 'Partner contribution updated successfully') {
+        alert('Congratulations! You are now a partner.');
+        fetchContractData();
+      } else {
+        alert('There was an error while processing your request. Please try again.');
+      }
     } catch (error) {
       console.error('Error becoming a partner:', error);
       alert('There was an error while processing your request. Please try again.');
+    }
+  };
+
+  const calculateEarnings = async () => {
+    try {
+      const response = await database_api.get('/api/get_all_partners');
+      const accounts = await web3.eth.getAccounts();
+      const account = accounts[0];
+
+      let userIsPartner = false;
+      for (const partner of response.data.partners) {
+        if (partner.address.toLowerCase() === account.toLowerCase()) {
+          userIsPartner = true;
+          break;
+        }
+      }
+
+      setIsAlreadyPartner(userIsPartner ? 1 : 0);
+
+      if (userIsPartner == 0) {
+        const response = await database_api.get('/api/get_all_partners');
+        const totalContributions = response.data.partners.reduce((sum, partner) => sum + partner.contribution, 0) + parseFloat(contributionAmount);
+        const newSharePercentage = (parseFloat(contributionAmount) / totalContributions) * 100;
+        setSharePercentage(newSharePercentage);
+
+        const monthlyEarnings = 0.01 * parseFloat(poolSize) * (newSharePercentage / 100);
+        setEstimatedMonthlyEarnings(Number(monthlyEarnings.toPrecision(3)));
+        setUserShare(parseFloat(contributionAmount));
+      }
+    } catch (error) {
+      console.error('Error calculating earnings:', error);
     }
   };
 
@@ -328,11 +411,21 @@ function BecomePartner({ web3 }) {
             className={styles.contributionInput}
             value={contributionAmount}
             onChange={handleContributionChange}
+            onKeyPress={handleKeyPress}
           />
-          <button className={styles.button}>Calculate Earnings 💸</button>
+          <button className={styles.button} onClick={calculateEarnings}>Calculate Earnings 💸</button>
+          {isAlreadyPartner == -1 ? <></> : 
+          (isAlreadyPartner === 1 ? (
+              <div className={`${commonStyles.content} ${styles.alreadyPartner}`}>
+                <p className={`${styles.infoText} ${styles.small}`}>
+                  You're already a partner. Please go to the <a href="/partner-dashboard">partner dashboard</a>.
+                </p>
+              </div>
+            ) : (
+          <>
           <div className={`${commonStyles.content} ${styles.calculator}`}>
             <div style={{ height: '200px', marginBottom: '20px' }}>
-              <PartnerSharePieChart partnerShare={partnerShare} />
+              <PartnerSharePieChart userShare={userShare} />
             </div>
             <div className={styles.calculatorContent}>
               <div className={styles.calculatorRow}>
@@ -340,7 +433,7 @@ function BecomePartner({ web3 }) {
                   Share Percentage in the Partner Pool 📈:
                 </p>
                 <p className={`${styles.infoText} ${styles.small} ${styles.floatRight}`}>
-                  <span className={styles.ethAmount}>3.21</span>%
+                  <span className={styles.ethAmount}>{sharePercentage}%</span>
                 </p>
               </div>
               <div className={styles.calculatorRow}>
@@ -348,7 +441,7 @@ function BecomePartner({ web3 }) {
                   Estimated Monthly Earnings 💰*:
                 </p>
                 <p className={`${styles.infoText} ${styles.small} ${styles.floatRight}`}>
-                  <span className={styles.ethAmount}>0.42</span>
+                  <span className={styles.ethAmount}>{estimatedMonthlyEarnings}</span>
                   <img 
                     src={ethereumLogo} 
                     alt="ETH" 
@@ -370,25 +463,25 @@ function BecomePartner({ web3 }) {
                   <li>2 years: </li>
                 </ul>
                 <ul className={`${styles.infoText} ${styles.small} ${styles.earningsAmounts}`}>
-                  <li><span className={styles.ethAmount}>1.26</span> <img 
+                  <li><span className={styles.ethAmount}>{estimatedMonthlyEarnings * 3}</span> <img 
                     src={ethereumLogo} 
                     alt="ETH" 
                     className={styles.ethLogo}
                     style={{marginRight: '0px'}}
                   /></li>
-                  <li><span className={styles.ethAmount}>2.52</span> <img 
+                  <li><span className={styles.ethAmount}>{estimatedMonthlyEarnings * 6}</span> <img 
                     src={ethereumLogo} 
                     alt="ETH" 
                     className={styles.ethLogo}
                     style={{marginRight: '0px'}}
                   /></li>
-                  <li><span className={styles.ethAmount}>5.04</span> <img 
+                  <li><span className={styles.ethAmount}>{estimatedMonthlyEarnings * 12}</span> <img 
                     src={ethereumLogo} 
                     alt="ETH" 
                     className={styles.ethLogo}
                     style={{marginRight: '0px'}}
                   /></li>
-                  <li><span className={styles.ethAmount}>10.08</span> <img 
+                  <li><span className={styles.ethAmount}>{estimatedMonthlyEarnings * 24}</span> <img 
                     src={ethereumLogo} 
                     alt="ETH" 
                     className={styles.ethLogo}
@@ -400,6 +493,8 @@ function BecomePartner({ web3 }) {
             </div>
           </div>
           <button id={styles.becomePartner} className={styles.button} onClick={handleBecomePartner}>Become a Partner 🚀</button>
+          </>
+          ))}
         </div>
       </div>
       <div className={styles.footbar}>

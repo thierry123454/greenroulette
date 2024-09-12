@@ -19,7 +19,6 @@ const database_api = axios.create({
 function GettingStarted({ setWeb3, setUserAddress }) {
   const [isLoaded, setIsLoaded] = useState(false); // State to track loading
   const [isSafari, setIsSafari] = useState(false);
-
   const { gameState, setGameState } = useContext(GameContext);
   const location = useLocation();
 

@@ -1,6 +1,6 @@
 // App.js
 import React, { useState, useEffect, useContext } from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import BettingComponent from './BettingComponent';
 import TransactionComponent from './TransactionComponent';
 import RouletteComponent from './RouletteComponent';
@@ -8,7 +8,7 @@ import OutcomeComponent from './OutcomeComponent';
 import LandingPage from './LandingPage';
 import GettingStarted from './GettingStarted';
 import BecomePartner from './BecomePartner';
-
+import PartnerDashboard from './PartnerDashboard';
 import Web3 from 'web3';
 import detectEthereumProvider from '@metamask/detect-provider';
 import { GameContext } from './GameContext';
@@ -72,7 +72,7 @@ function App() {
   };
 
   return (
-    <Router>
+    <>
       <Chat setIsChatOpen={setIsChatOpen} isChatOpen={isChatOpen} setUnreadCounter={setUnreadCounter} />
       <Routes>
         <Route path="/" element={<LandingPage />} />
@@ -82,8 +82,9 @@ function App() {
         <Route path="/roulette" element={<RouletteComponent />} />
         <Route path="/outcome" element={<OutcomeComponent />} />
         <Route path="/become-a-partner" element={<BecomePartner web3={web3} />} />
+        <Route path="/partner-dashboard" element={<PartnerDashboard />} />
       </Routes>
-    </Router>
+    </>
   );
 }
 

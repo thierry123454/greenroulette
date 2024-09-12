@@ -253,6 +253,92 @@ app.get('/api/get_username/:address', (req, res) => {
   });
 });
 
+// Endpoint to set the partner contribution for a user
+app.post('/api/set_partner_contribution', (req, res) => {
+  const { address, contribution } = req.body;
+
+  if (!address || contribution === undefined) {
+    return res.status(400).json({ error: 'Address and contribution amount are required' });
+  }
+
+  let sanitizedContribution = validateAndSanitizeInput(contribution);
+  if (!sanitizedContribution) {
+    return res.status(400).json({ error: 'Invalid contribution format. Must be a number with up to 8 decimal places.' });
+  }
+
+  const sql = `
+    UPDATE players 
+    SET partner_contribution = partner_contribution + ? 
+    WHERE address = ?
+  `;
+
+  pool.query(sql, [sanitizedContribution, address], (err, result) => {
+    if (err) {
+      console.error('Error updating partner contribution:', err);
+      return res.status(500).json({ error: 'Error updating partner contribution' });
+    }
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ error: 'Player not found' });
+    }
+
+    res.json({ message: 'Partner contribution updated successfully' });
+  });
+});
+
+// Endpoint to get all partners and their contribution amounts
+app.get('/api/get_all_partners', (req, res) => {
+  const sql = `
+    SELECT address, username, partner_contribution
+    FROM players
+    WHERE partner_contribution > 0
+    ORDER BY partner_contribution DESC
+  `;
+
+  pool.query(sql, (err, results) => {
+    if (err) {
+      console.error('Error fetching partners:', err);
+      return res.status(500).json({ error: 'Error fetching partners' });
+    }
+
+    const partners = results.map(row => ({
+      address: row.address,
+      username: row.username || 'Anonymous',
+      contribution: parseFloat(row.partner_contribution)
+    }));
+
+    res.json({ partners });
+  });
+});
+
+// Endpoint to revoke partnership
+app.post('/api/remove_partner', (req, res) => {
+  const { address } = req.body;
+
+  if (!address) {
+    return res.status(400).json({ error: 'Address is required' });
+  }
+
+  const sql = `
+    UPDATE players 
+    SET partner_contribution = 0 
+    WHERE address = ?
+  `;
+
+  pool.query(sql, [address], (err, result) => {
+    if (err) {
+      console.error('Error revoking partnership:', err);
+      return res.status(500).json({ error: 'Error revoking partnership' });
+    }
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ error: 'Partner not found' });
+    }
+
+    res.json({ message: 'Partner removed successfully' });
+  });
+});
+
 // Start the server
 app.listen(port, () => {
   console.log(`Server running on http://localhost:${port}`);
