@@ -159,3 +159,12 @@
   cursor: pointer;
   transform: scale(1.7);
 }
+
+.partner {
+  font-weight: 800;
+  background: linear-gradient(180deg, #FF7676 0%, #FFCF54 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-fill-color: transparent;
+}

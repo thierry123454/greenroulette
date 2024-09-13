@@ -14,6 +14,8 @@ import { motion } from 'framer-motion';
 
 import { ReactComponent as Check } from './images/check.svg'
 import { ReactComponent as Donate } from './images/donate.svg'
+import { ReactComponent as RouletteBack } from './images/roulette_back.svg'
+import { ReactComponent as RouletteSpinning } from './images/roulette_spinning.svg'
 
 const contractAddress = "0xDE498a87437214F6862A1f4B46D05817799eBd48";
 
@@ -59,6 +61,7 @@ function BettingComponent({ web3, isChatOpen, setIsChatOpen, userAddress, unread
 
   const [confettiActive, setConfettiActive] = useState(false);
   const [fadeOutConfetti, setFadeOutConfetti] = useState(false);
+  const [isPlacingBet, setIsPlacingBet] = useState(false);
 
   // Move the contract initialization inside a useEffect
   const [contract, setContract] = useState(null);
@@ -204,6 +207,7 @@ function BettingComponent({ web3, isChatOpen, setIsChatOpen, userAddress, unread
   }, [gameState, navigate, isLoaded]);
 
   const placeBet = async (guess) => {
+    setIsPlacingBet(true);
     try {
       const accounts = await web3.eth.getAccounts();
       await contract.methods.setBet(guess).send({
@@ -217,6 +221,8 @@ function BettingComponent({ web3, isChatOpen, setIsChatOpen, userAddress, unread
       setIsPlaced(guess);
     } catch (error) {
       console.error('Error placing bet:', error);
+    } finally {
+      setIsPlacingBet(false);
     }
   };
 
@@ -529,20 +535,27 @@ function BettingComponent({ web3, isChatOpen, setIsChatOpen, userAddress, unread
             className={styles.betInput}
             disabled={betPlaced != -1}
           />
-          <div className={styles.buttons}>
-            <button 
-              onClick={() => placeBet(0)}
-              disabled={betPlaced != -1}
-              className={`${styles.button} ${styles.red} ${betPlaced == -1 ? styles.canHoverRed : ''} ${betPlaced == 0 ? styles.selected : ''}`}>
-              Red
-            </button>
-            <button 
-              onClick={() => placeBet(1)} 
-              disabled={betPlaced != -1} 
-              className={`${styles.button} ${styles.black} ${betPlaced == -1 ? styles.canHoverBlack : ''} ${betPlaced == 1 ? styles.selected : ''}`}>
+          {!isPlacingBet ? (
+            <div className={styles.buttons}>
+              <button 
+                onClick={() => placeBet(0)}
+                disabled={betPlaced != -1}
+                className={`${styles.button} ${styles.red} ${betPlaced == -1 ? styles.canHoverRed : ''} ${betPlaced == 0 ? styles.selected : ''}`}>
+                Red
+              </button>
+              <button 
+                onClick={() => placeBet(1)} 
+                disabled={betPlaced != -1} 
+                className={`${styles.button} ${styles.black} ${betPlaced == -1 ? styles.canHoverBlack : ''} ${betPlaced == 1 ? styles.selected : ''}`}>
                 Black
-            </button>
-          </div>
+              </button>
+            </div>
+          ) : (
+            <div id={commonStyles.spinner} className={styles.spinner}>
+              <RouletteBack />
+              <RouletteSpinning id={commonStyles.spinning} />
+            </div>
+          )}
           <div className={styles.address}>
             <img src={metamaskLogo} className={styles.mm_logo} alt="MetaMask logo"/>
             {userAddress.substring(0,6) + "..." + userAddress.substring(userAddress.length - 4)}

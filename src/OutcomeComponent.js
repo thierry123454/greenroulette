@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { GameContext } from './GameContext';
 import commonStyles from './CommonStyles.module.css';
@@ -28,6 +28,9 @@ function OutcomeComponent() {
   const [playerWon, setTotalPlayerWon] = useState(0); // State to track loading
   const [outcome, setOutcome] = useState(null);
   const { width, height } = useWindowSize();  // Get window size for Confetti
+
+  const [animationPlayed, setAnimationPlayed] = useState(false);
+  const valuesRef = useRef({ totalWon: 0, totalDonated: 0, playerWon: 0 });
 
   useEffect(() => {
     setIsLoaded(true); // Set to true when component mounts
@@ -68,7 +71,7 @@ function OutcomeComponent() {
 
   useEffect(() => {
     // Calculate the outcome when gameState updates
-    if (gameState.outcome != null) {
+    if (gameState.outcome != null && !animationPlayed) {
       const number = parseInt(gameState.outcome);
       const isRed = redNumbers.has(number);
       const isBlack = blackNumbers.has(number);
@@ -98,6 +101,14 @@ function OutcomeComponent() {
       setTotalDonated(donated * gameState.exchange);
       setTotalPlayerWon(gameState.bet.amount * gameState.exchange);
 
+      valuesRef.current = {
+        totalWon: total_won * gameState.exchange,
+        totalDonated: donated * gameState.exchange,
+        playerWon: gameState.bet.amount * gameState.exchange
+      };
+
+      setAnimationPlayed(true);
+
       // Determine win or loss
       if (!gameState.bet.placed) {
         setOutcome(2);
@@ -107,7 +118,7 @@ function OutcomeComponent() {
         setOutcome(1); // Loss
       }
     }
-  }, [gameState]);
+  }, [gameState, animationPlayed]);
 
   return (
     <div className={`${commonStyles.container} ${isLoaded ? commonStyles.loaded : ''}`}>
@@ -123,9 +134,13 @@ function OutcomeComponent() {
                 {outcome == 0 ? "You Won🏆" : (outcome == 1 ? "You Donated🌳*" : "Others Won🏆")}
               </h2>
               <span className={styles.amount}>
-                {outcome == 0 ? <CountUp duration={5} end={playerWon} suffix="$" /> 
-                : (outcome == 1 ? <CountUp duration={5} end={playerWon * 0.75} suffix="$" /> : 
-                 <CountUp duration={5} end={totalWon} suffix="$" />)}
+                {outcome == 0 ? (
+                  <CountUp duration={5} end={valuesRef.current.playerWon} suffix="$" />
+                ) : outcome == 1 ? (
+                  <CountUp duration={5} end={valuesRef.current.playerWon * 0.75} suffix="$" />
+                ) : (
+                  <CountUp duration={5} end={valuesRef.current.totalWon} suffix="$" />
+                )}
               </span>
             </div>
             <hr className={commonStyles.line} />

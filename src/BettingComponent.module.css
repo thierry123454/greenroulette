@@ -140,6 +140,11 @@
   margin-right: 0;
 }
 
+.spinner {
+  left: -10px;
+  margin-top: 0px !important;
+}
+
 .mm_logo {
   width: 15px;
   position: relative;

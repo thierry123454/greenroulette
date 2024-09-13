@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext, useRef } from 'react';
+import React, { useState, useEffect, useContext, useRef, useCallback } from 'react';
 import io from 'socket.io-client';
 import axios from 'axios';
 
@@ -33,6 +33,7 @@ function Chat({ setIsChatOpen, isChatOpen, setUnreadCounter }) {
   const { userAddress, bet, exchange, total_red, total_black } = gameState;
   const [username, setUsername] = useState(null);
   const [onlineUsers, setOnlineUsers] = useState(0);
+  const [isPartner, setIsPartner] = useState(false);
 
   const messagesEndRef = useRef(null);
 
@@ -54,6 +55,21 @@ function Chat({ setIsChatOpen, isChatOpen, setUnreadCounter }) {
 
     fetchUsername();
   }, [userAddress]);
+
+  const checkIfPartner = useCallback(async () => {
+    try {
+      const response = await database_api.get('/api/get_all_partners');
+      const partners = response.data.partners;
+      const isPartner = partners.some(partner => partner.address && userAddress && partner.address.toLowerCase() === userAddress.toLowerCase());
+      setIsPartner(isPartner);
+    } catch (error) {
+      console.error('Error checking if user is partner:', error);
+    }
+  }, [userAddress]);
+
+  useEffect(() => {
+    checkIfPartner();
+  }, [checkIfPartner, userAddress]);
 
   useEffect(() => {
     socket.on('message', message => {
@@ -115,7 +131,8 @@ function Chat({ setIsChatOpen, isChatOpen, setUnreadCounter }) {
   const sendMessage = () => {
     if (input.trim() && input.length <= 200) {
       console.log(username);
-      socket.emit('send message', userAddress, username, bet.choice, bet.amount, input);
+      console.log("isPartner: ", isPartner);
+      socket.emit('send message', userAddress, username, bet.choice, bet.amount, input, isPartner);
       setInput('');
     }
   };
@@ -181,11 +198,13 @@ function Chat({ setIsChatOpen, isChatOpen, setUnreadCounter }) {
             msg.type !== 'bet' ?
             <>
               <span id={styles.userInfo}>
-                {msg.user === userAddress ? "You " :
-                !msg.name ?
-                msg.user.substring(0,6) + "..." + msg.user.substring(userAddress.length - 4) + " " : 
-                msg.name + " "
-                }
+                <span className={msg.isPartner ? styles.partner : ''}>
+                  {msg.user === userAddress ? "You " :
+                  !msg.name ?
+                  msg.user.substring(0,6) + "..." + msg.user.substring(userAddress.length - 4) + " " : 
+                  msg.name + " "
+                  }
+                </span>
 
                 <span style={{ color: msg.betChoice !== null ? (msg.betChoice === 0 ? '#CA0000' : "#171717") : 'gray' }}>
                   {msg.betChoice !== null ?

@@ -158,9 +158,9 @@ function TransactionComponent() {
               <div className={`${styles.countdown} ${commonStyles.info_text}`}>{gameState.stage === 1 || gameState.stage == -1 ? (gameState.timer > 120 ? 0 : gameState.timer) : timeLeft}</div>
             </div>
         </div>
-        <div id={styles.spinner}>
+        <div id={commonStyles.spinner}>
           <RouletteBack />
-          <RouletteSpinning id={styles.spinning} />
+          <RouletteSpinning id={commonStyles.spinning} />
         </div>
       </div>
       {!gameState.has_visited_bet && <JoinLateNotice />}

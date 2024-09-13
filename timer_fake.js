@@ -135,8 +135,9 @@ async function fetchRandomNumber() {
 
 // Start the initial stage as soon as the server starts
 // startStageOne();
-checkBettingClosed();
+// checkBettingClosed();
 // prepareForPayout(0);
+prepareForPayout(1);
 
 // Handling a new connection
 io.on('connection', (socket) => {

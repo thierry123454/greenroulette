@@ -1,5 +1,5 @@
 // PartnerDashboard.js
-import React, { useEffect, useState, useCallback, useRef } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import styles from './BecomePartner.module.css'; // Import CSS module for styles
 import commonStyles from './CommonStyles.module.css'; // Import CSS module for styles
 import { useNavigate } from 'react-router-dom';

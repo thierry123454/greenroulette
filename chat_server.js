@@ -32,14 +32,15 @@ io.on('connection', (socket) => {
   // Emit the updated online users count to all clients
   io.emit('onlineUsers', onlineUsers);
 
-  socket.on('send message', (address, username, betChoice, betAmount, msg) => {
+  socket.on('send message', (address, username, betChoice, betAmount, msg, isPartner) => {
     const safeMessage = xss(msg);
     io.emit('message', { 
       user: address, 
       name: username,
       text: safeMessage, 
       betChoice: betChoice, 
-      betAmount: betAmount 
+      betAmount: betAmount,
+      isPartner: isPartner
     });
   });
 
