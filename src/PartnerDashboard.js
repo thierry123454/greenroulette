@@ -86,6 +86,7 @@ function PartnerSharePieChart({ userShare, userAddress }) {
 
 function PartnerDashboard() {
   const navigate = useNavigate();
+  const [userOriginalShare, setUserOriginalShare] = useState(0);
   const [userShare, setUserShare] = useState(0);
   const [sharePercentage, setSharePercentage] = useState(0);
   const [estimatedMonthlyEarnings, setEstimatedMonthlyEarnings] = useState(0);
@@ -95,6 +96,15 @@ function PartnerDashboard() {
   const [isLoading, setIsLoading] = useState(true);
   const [web3, setWeb3] = useState(null);
   const [userAddress, setUserAddress] = useState('');
+  const [contributionAmount, setContributionAmount] = useState(0);
+  const [additionalSharePercentage, setAdditionalSharePercentage] = useState(0);
+  const [additionalMonthlyEarnings, setAdditionalMonthlyEarnings] = useState(0);
+  const [earningsOverTime, setEarningsOverTime] = useState({
+    threeMonths: 0,
+    sixMonths: 0,
+    oneYear: 0,
+    twoYears: 0
+  });
 
   useEffect(() => {
     if (window.ethereum) {
@@ -112,6 +122,22 @@ function PartnerDashboard() {
     }
   }, [web3]);
 
+  const calculateEarningsOverTime = (months, newSharePercentage, poolParam = null) => {
+    let currentPoolSize = poolParam ? parseFloat(poolParam) + parseFloat(contributionAmount) : parseFloat(poolSize) + parseFloat(contributionAmount);
+
+  
+    let totalEarnings = 0;
+    let monthlyShare = newSharePercentage / 100;
+    for (let i = 0; i < months; i++) {
+      let monthlyEarning = currentPoolSize * 0.01 * monthlyShare;
+      totalEarnings += monthlyEarning;
+      currentPoolSize *= 0.94; // Decrease pool size by 6%
+    }
+    
+    return Number(totalEarnings.toPrecision(3));
+  };
+  
+
   const fetchUserData = useCallback(async (account, userContribution) => {
     if (contract && web3) {
       try {
@@ -120,21 +146,32 @@ function PartnerDashboard() {
           contract.methods.getTotalPartnerContributions().call()
         ]);
 
-        setPoolSize(web3.utils.fromWei(poolSizeWEI, 'ether'));
+        console.log("Pool size WEI: " + poolSizeWEI);
+
+        const poolSizeEth = web3.utils.fromWei(poolSizeWEI, 'ether');
+        setPoolSize(poolSizeEth);
         const userShareEth = web3.utils.fromWei(userContribution, 'ether');
         setUserShare(parseFloat(userShareEth));
-
+        setUserOriginalShare(parseFloat(userShareEth));
         const totalContributionsEth = web3.utils.fromWei(totalContributions, 'ether');
         const newSharePercentage = (parseFloat(userShareEth) / parseFloat(totalContributionsEth)) * 100;
         setSharePercentage(newSharePercentage);
 
         console.log("User share: " + userShareEth);
         console.log("Total contributions partners: " + totalContributionsEth);
-        console.log("Share percentage: " + newSharePercentage);
-        console.log("Total pool size: " + parseFloat(poolSize));
+        console.log("Share percentage:  " + newSharePercentage);
+        console.log("Total pool size: " + poolSizeEth);
 
-        const monthlyEarnings = 0.01 * parseFloat(poolSize) * (newSharePercentage / 100);
+        const monthlyEarnings = 0.01 * parseFloat(poolSizeEth) * (newSharePercentage / 100);
         setEstimatedMonthlyEarnings(Number(monthlyEarnings.toPrecision(4)));
+
+        // Calculate earnings over time using the new share percentage
+        setEarningsOverTime({
+          threeMonths: calculateEarningsOverTime(3, newSharePercentage, poolSizeEth),
+          sixMonths: calculateEarningsOverTime(6, newSharePercentage, poolSizeEth),
+          oneYear: calculateEarningsOverTime(12, newSharePercentage, poolSizeEth),
+          twoYears: calculateEarningsOverTime(24, newSharePercentage, poolSizeEth)
+        });
       } catch (error) {
         console.error('Error fetching user data:', error);
       }
@@ -151,12 +188,14 @@ function PartnerDashboard() {
 
         const response = await database_api.get('/api/get_all_partners');
         const partners = response.data.partners;
-        const isPartner = partners.some(partner => partner.address.toLowerCase() === account.toLowerCase());
+        const isPartner = partners.some(partner => partner.address && account && partner.address.toLowerCase() === account.toLowerCase());
         setIsPartner(isPartner);
 
         if (isPartner) {
-          const userContribution = partners.find(partner => partner.address.toLowerCase() === account.toLowerCase()).contribution;
-          fetchUserData(account, web3.utils.toWei(userContribution.toString(), 'ether'));
+          const partnerData = partners.find(partner => partner.address && account && partner.address.toLowerCase() === account.toLowerCase());
+          if (partnerData && partnerData.contribution) {
+            fetchUserData(account, web3.utils.toWei(partnerData.contribution.toString(), 'ether'));
+          }
         }
       } catch (error) {
         console.error('Error checking if user is partner:', error);
@@ -168,7 +207,6 @@ function PartnerDashboard() {
     const checkPartnerStatus = async () => {
       if (web3) {
         try {
-          console.log("Checking partner status");
           await checkIfPartner();
         } catch (error) {
           console.error('Error checking partner status:', error);
@@ -220,6 +258,99 @@ function PartnerDashboard() {
     }
   };
 
+  const handleContributionChange = (e) => {
+    setContributionAmount(e.target.value);
+  };
+
+  const handleKeyPress = (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault(); // Prevent default form submission behavior
+      handleShowEarnings();
+    }
+  };
+
+  const checkPoolSizeVsContribution = (months) => {
+    let currentPoolSize = parseFloat(poolSize) + parseFloat(contributionAmount);
+    let originalContribution = parseFloat(userOriginalShare) + parseFloat(contributionAmount);
+
+    for (let i = 0; i < months; i++) {
+      currentPoolSize *= 0.94; // Decrease pool size by 6%
+      
+      if (currentPoolSize < originalContribution) {
+        return i + 1; // Return the number of months it took for pool size to become smaller
+      }
+    }
+
+    return -1; // Pool size remains larger than original contribution for the entire period
+  };
+
+  const handleShowEarnings = async () => {
+    try {
+      const response = await database_api.get('/api/get_all_partners');
+
+      const totalContributions = response.data.partners.reduce((sum, partner) => sum + partner.contribution, 0);
+      const newTotalContributions = totalContributions + parseFloat(contributionAmount);
+      const newSharePercentage = ((userOriginalShare + parseFloat(contributionAmount)) / newTotalContributions) * 100;
+
+      setSharePercentage(newSharePercentage);
+      setUserShare(userOriginalShare + parseFloat(contributionAmount));
+
+      const newMonthlyEarnings = 0.01 * (parseFloat(poolSize) + parseFloat(contributionAmount)) * (newSharePercentage / 100);
+      setEstimatedMonthlyEarnings(Number(newMonthlyEarnings.toPrecision(3)));
+
+      // Calculate earnings over time
+      setEarningsOverTime({
+        threeMonths: calculateEarningsOverTime(3, newSharePercentage),
+        sixMonths: calculateEarningsOverTime(6, newSharePercentage),
+        oneYear: calculateEarningsOverTime(12, newSharePercentage),
+        twoYears: calculateEarningsOverTime(24, newSharePercentage)
+      });
+
+      const monthsUntilNoWithdrawal = checkPoolSizeVsContribution(24);
+      if (monthsUntilNoWithdrawal !== -1) {
+        alert(`Warning: After ${monthsUntilNoWithdrawal} month(s), the pool size will become smaller than your original contribution. You won't be able to withdraw your stake after that unless the pool size expands.`);
+      }
+    } catch (error) {
+      console.error('Error calculating additional earnings:', error);
+    }
+  };
+
+  const handleStakeMore = async () => {
+    if (!web3 || !contract || !contributionAmount) {
+      alert('Please connect your wallet and enter a contribution amount.');
+      return;
+    }
+
+    try {
+      const accounts = await web3.eth.getAccounts();
+      const account = accounts[0];
+
+      // Convert contribution amount from ETH to Wei
+      const contributionWei = web3.utils.toWei(contributionAmount, 'ether');
+
+      // Call the becomePartner function in the smart contract
+      await contract.methods.becomePartner().send({
+        from: account,
+        value: contributionWei
+      });
+
+      // Update the partner contribution in the database
+      const response = await database_api.post('/api/set_partner_contribution', { 
+        address: account, 
+        contribution: contributionAmount 
+      });
+      if (response.data.message === 'Partner contribution updated successfully') {
+        alert('Congratulations! You have staked more ETH.');
+        handleShowEarnings();
+      } else {
+        alert('There was an error while processing your request. Please try again.');
+      }
+    } catch (error) {
+      console.error('Error becoming a partner:', error);
+      alert('There was an error while processing your request. Please try again.');
+    }
+  };
+
   if (!isPartner) {
     return (
       <div className={styles.pageContainer}>
@@ -229,7 +360,7 @@ function PartnerDashboard() {
         <div className={styles.main} style={{ marginTop: '-40px' }}>
         <p className={styles.slogan}>Your <span id={styles.distinguish}>Partner</span> Dashboard</p>
         <div className={`${commonStyles.content} ${styles.calculator}`}>
-          <p className={styles.infoText}>You're not a partner. Please click <a href="/" style={{color: 'blue'}}>here</a> to go back to the homepage.</p>
+          <p className={styles.infoText}>You're not a partner. Please click <a href="/" style={{color: 'blue'}}>here</a> to go back to the homepage. If you're sure you're a partner, please try refreshing this page.</p>
         </div>
       </div>
       </div>
@@ -243,7 +374,7 @@ function PartnerDashboard() {
       </div>
       <div className={styles.main} style={{ marginTop: '-40px' }}>
         <p className={styles.slogan}>Your <span id={styles.distinguish}>Partner</span> Dashboard</p>
-        <div className={`${commonStyles.content} ${styles.calculator}`}>
+        <div className={`${commonStyles.content} ${styles.calculator} ${styles.dashboard}`}>
           <div style={{ height: '200px', marginBottom: '20px' }}>
             <PartnerSharePieChart userShare={userShare} userAddress={userAddress} />
           </div>
@@ -283,25 +414,25 @@ function PartnerDashboard() {
                 <li>2 years: </li>
               </ul>
               <ul className={`${styles.infoText} ${styles.small} ${styles.earningsAmounts}`}>
-                <li><span className={styles.ethAmount}>{(estimatedMonthlyEarnings * 3).toFixed(4)}</span> <img 
+                <li><span className={styles.ethAmount}>{earningsOverTime.threeMonths}</span> <img 
                   src={ethereumLogo} 
                   alt="ETH" 
                   className={styles.ethLogo}
                   style={{marginRight: '0px'}}
                 /></li>
-                <li><span className={styles.ethAmount}>{(estimatedMonthlyEarnings * 6).toFixed(4)}</span> <img 
+                <li><span className={styles.ethAmount}>{earningsOverTime.sixMonths}</span> <img 
                   src={ethereumLogo} 
                   alt="ETH" 
                   className={styles.ethLogo}
                   style={{marginRight: '0px'}}
                 /></li>
-                <li><span className={styles.ethAmount}>{(estimatedMonthlyEarnings * 12).toFixed(4)}</span> <img 
+                <li><span className={styles.ethAmount}>{earningsOverTime.oneYear}</span> <img 
                   src={ethereumLogo} 
                   alt="ETH" 
                   className={styles.ethLogo}
                   style={{marginRight: '0px'}}
                 /></li>
-                <li><span className={styles.ethAmount}>{(estimatedMonthlyEarnings * 24).toFixed(4)}</span> <img 
+                <li><span className={styles.ethAmount}>{earningsOverTime.twoYears}</span> <img 
                   src={ethereumLogo} 
                   alt="ETH" 
                   className={styles.ethLogo}
@@ -310,16 +441,31 @@ function PartnerDashboard() {
               </ul>
             </div>
             <span id={styles.subtext} style={{ position: 'relative', bottom: '10px' }}>* If current pool size and user share remains the same or expands.</span>
+            <div className={styles.contributionSection}>
+              <p className={`${styles.slogan} ${styles.contributionTitle}`}>Increase Your Share</p>
+              <div className={styles.inputGroup}>
+                <input
+                  type="number"
+                  placeholder="Enter amount in ETH"
+                  className={styles.contributionInput}
+                  id="additionalContribution"
+                  value={contributionAmount}
+                  onChange={handleContributionChange}
+                  onKeyPress={handleKeyPress}
+                />
+                <div className={styles.buttonGroup}>
+                  <button className={styles.button} onClick={() => handleShowEarnings()} style={{marginLeft: '0'}}>
+                    Show Earnings
+                  </button>
+                  <button className={styles.button} onClick={() => handleStakeMore()}>
+                    Stake More
+                  </button>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
         <button id={styles.revokePartnership} className={styles.button} onClick={handleRevokePartnership}>Revoke Partnership ❌</button>
-      </div>
-      <div className={styles.footbar}>
-        <Logo />
-        <div className={styles.buttonGroup}>
-          <button className={styles.footbarButton}><Mail /></button>
-          <button className={styles.footbarButton}><img src={xLogo} alt="X Logo" /></button>
-        </div>
       </div>
     </div>
   );

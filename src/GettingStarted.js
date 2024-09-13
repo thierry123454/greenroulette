@@ -64,7 +64,7 @@ function GettingStarted({ setWeb3, setUserAddress }) {
         if (redirectTo === 'partner') {
           navigate('/become-a-partner');
         } else {
-          navigate('/become-a-partner');
+          navigate('/betting');
         }
 
       } catch (error) {

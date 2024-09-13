@@ -431,7 +431,7 @@ function BettingComponent({ web3, isChatOpen, setIsChatOpen, userAddress, unread
                 </div>
                 <div style={{textAlign: 'center'}}>
                   <input
-                      type="text"
+                      type="number"
                       value={donationAmount}
                       id={styles.usernameInput}
                       className={styles.betInput}
@@ -523,7 +523,7 @@ function BettingComponent({ web3, isChatOpen, setIsChatOpen, userAddress, unread
         </div>
         <div className={styles.betting}>
           <input
-            type="text" 
+            type="number" 
             onChange={e => setBetAmount(e.target.value)} 
             placeholder="Bet Amount in USD" 
             className={styles.betInput}

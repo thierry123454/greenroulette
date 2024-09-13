@@ -102,7 +102,13 @@ function BecomePartner({ web3 }) {
   const [sharePercentage, setSharePercentage] = useState(0);
   const [estimatedMonthlyEarnings, setEstimatedMonthlyEarnings] = useState(0);
   const [isAlreadyPartner, setIsAlreadyPartner] = useState(-1);
-
+  const [earningsOverTime, setEarningsOverTime] = useState({
+    threeMonths: 0,
+    sixMonths: 0,
+    oneYear: 0,
+    twoYears: 0
+  });
+  const [warningMessage, setWarningMessage] = useState('');
   useEffect(() => {
     database_api.get('/api/get_all_partners')
       .then(response => {
@@ -154,10 +160,10 @@ function BecomePartner({ web3 }) {
           contract.methods.getTotalRewardsDistributedToPartners().call()
         ]);
 
-        setPoolSize(web3.utils.fromWei(poolSize, 'ether'));
+        setPoolSize(Number(parseFloat(web3.utils.fromWei(poolSize, 'ether')).toPrecision(3)));
         setPartnerCount(Number(partnerCount));
         setTotalContributions(web3.utils.fromWei(totalContributions, 'ether'));
-        setTotalRewards(web3.utils.fromWei(totalRewards, 'ether'));
+        setTotalRewards(Number(parseFloat(web3.utils.fromWei(totalRewards, 'ether')).toPrecision(3)));
       } catch (error) {
         console.error('Error fetching contract data:', error);
       }
@@ -200,6 +206,36 @@ function BecomePartner({ web3 }) {
     }
   };
 
+  const calculateEarningsOverTime = (months, newSharePercentage) => {
+    let currentPoolSize = parseFloat(poolSize) + parseFloat(contributionAmount);
+  
+    let totalEarnings = 0;
+    let monthlyShare = newSharePercentage / 100;
+  
+    for (let i = 0; i < months; i++) {
+      let monthlyEarning = currentPoolSize * 0.01 * monthlyShare;
+      totalEarnings += monthlyEarning;
+      currentPoolSize *= 0.94; // Decrease pool size by 6%
+    }
+  
+    return Number(totalEarnings.toPrecision(3));
+  };
+
+  const checkPoolSizeVsContribution = (months) => {
+    let currentPoolSize = parseFloat(poolSize) + parseFloat(contributionAmount);
+    let originalContribution = parseFloat(contributionAmount);
+
+    for (let i = 0; i < months; i++) {
+      currentPoolSize *= 0.94; // Decrease pool size by 6%
+      
+      if (currentPoolSize < originalContribution) {
+        return i + 1; // Return the number of months it took for pool size to become smaller
+      }
+    }
+
+    return -1; // Pool size remains larger than original contribution for the entire period
+  };
+
   const calculateEarnings = async () => {
     try {
       const response = await database_api.get('/api/get_all_partners');
@@ -222,9 +258,24 @@ function BecomePartner({ web3 }) {
         const newSharePercentage = (parseFloat(contributionAmount) / totalContributions) * 100;
         setSharePercentage(newSharePercentage);
 
-        const monthlyEarnings = 0.01 * parseFloat(poolSize) * (newSharePercentage / 100);
+        const monthlyEarnings = 0.01 * (parseFloat(poolSize) + parseFloat(contributionAmount)) * (newSharePercentage / 100);
         setEstimatedMonthlyEarnings(Number(monthlyEarnings.toPrecision(3)));
         setUserShare(parseFloat(contributionAmount));
+
+        // Calculate earnings over time
+        setEarningsOverTime({
+          threeMonths: calculateEarningsOverTime(3, newSharePercentage),
+          sixMonths: calculateEarningsOverTime(6, newSharePercentage),
+          oneYear: calculateEarningsOverTime(12, newSharePercentage),
+          twoYears: calculateEarningsOverTime(24, newSharePercentage)
+        });
+
+        const monthsUntilNoWithdrawal = checkPoolSizeVsContribution(24);
+        if (monthsUntilNoWithdrawal !== -1) {
+          setWarningMessage(`⚠️ Warning: After ${monthsUntilNoWithdrawal} month(s), the pool size will become smaller than your original contribution. You won't be able to withdraw your stake after that unless the pool size expands. ⚠️`);
+        } else {
+          setWarningMessage('');
+        }
       }
     } catch (error) {
       console.error('Error calculating earnings:', error);
@@ -406,7 +457,7 @@ function BecomePartner({ web3 }) {
           </div>
           <h1 className={styles.title}>Calculate your Earnings & Become a Partner Now!</h1>
           <input
-            type="text"
+            type="number"
             placeholder="Enter your contribution amount (in ETH)" 
             className={styles.contributionInput}
             value={contributionAmount}
@@ -463,25 +514,25 @@ function BecomePartner({ web3 }) {
                   <li>2 years: </li>
                 </ul>
                 <ul className={`${styles.infoText} ${styles.small} ${styles.earningsAmounts}`}>
-                  <li><span className={styles.ethAmount}>{estimatedMonthlyEarnings * 3}</span> <img 
+                  <li><span className={styles.ethAmount}>{earningsOverTime.threeMonths}</span> <img 
                     src={ethereumLogo} 
                     alt="ETH" 
                     className={styles.ethLogo}
                     style={{marginRight: '0px'}}
                   /></li>
-                  <li><span className={styles.ethAmount}>{estimatedMonthlyEarnings * 6}</span> <img 
+                  <li><span className={styles.ethAmount}>{earningsOverTime.sixMonths}</span> <img 
                     src={ethereumLogo} 
                     alt="ETH" 
                     className={styles.ethLogo}
                     style={{marginRight: '0px'}}
                   /></li>
-                  <li><span className={styles.ethAmount}>{estimatedMonthlyEarnings * 12}</span> <img 
+                  <li><span className={styles.ethAmount}>{earningsOverTime.oneYear}</span> <img 
                     src={ethereumLogo} 
                     alt="ETH" 
                     className={styles.ethLogo}
                     style={{marginRight: '0px'}}
                   /></li>
-                  <li><span className={styles.ethAmount}>{estimatedMonthlyEarnings * 24}</span> <img 
+                  <li><span className={styles.ethAmount}>{earningsOverTime.twoYears}</span> <img 
                     src={ethereumLogo} 
                     alt="ETH" 
                     className={styles.ethLogo}
@@ -492,6 +543,7 @@ function BecomePartner({ web3 }) {
               <span id={styles.subtext} style={{ position: 'relative', bottom: '10px' }}>* If current pool size and user share remains the same or expands.</span>
             </div>
           </div>
+          <span className={styles.warning}>{warningMessage}</span>
           <button id={styles.becomePartner} className={styles.button} onClick={handleBecomePartner}>Become a Partner 🚀</button>
           </>
           ))}

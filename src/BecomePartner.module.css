@@ -62,7 +62,7 @@ html, body {
   flex-direction: column;
   align-items: center; /* Aligns items vertically in the center */
   justify-content: center;
-  max-width: 2000px;
+  width: 100%;
   position: relative;
   top: -200px;
 }
@@ -252,20 +252,6 @@ button:hover {
   margin-bottom: 0px;
 }
 
-.contributionInput {
-  margin-bottom: 10px;
-  padding: 10px;
-  border: 1px solid #E0E0E0;
-  border-radius: 5px;
-  text-align: center;
-  font-weight: 500;
-  font-size: 20px;
-  box-shadow: 1px 1px 5px rgba(0, 0, 0, 0.25);
-  border-radius: 8px;
-  width: 400px;
-}
-
-
 .button {
   padding: 8px 16px;
   margin-top: 20px;
@@ -378,4 +364,55 @@ button:hover {
 
 .footbar > .buttonGroup:last-child {
   margin-right: 10px;
+}
+
+/* DASHBOARD */
+.dashboard {
+  height: 700px;
+}
+
+.contributionSection {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  margin-top: -20px;
+}
+
+.contributionTitle {
+  font-size: 34px;
+  font-weight: 600;
+  margin-bottom: 15px;
+  text-align: center;
+}
+
+.inputGroup {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+}
+
+.contributionInput {
+  width: 80%;
+  max-width: 300px;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  font-size: 14px;
+  text-align: center;
+}
+
+.warning {
+  color: red;
+  font-size: 12px;
+  margin-top: 5px;
+  border: 1px solid red;
+  border-radius: 5px;
+  padding: 5px;
+  display: none;
+}
+
+.warning:not(:empty) {
+  display: block;
 }
