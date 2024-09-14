@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { GameContext } from './GameContext';
 import styles from './BettingComponent.module.css';
@@ -7,7 +7,6 @@ import Logo from './Logo';
 import io from 'socket.io-client';
 import metamaskLogo from'./images/metamask.png';
 import rouletteContractAbi from './abis/rouletteContractAbi.json';
-import detectEthereumProvider from '@metamask/detect-provider';
 import axios from 'axios';
 import Confetti from 'react-confetti';
 import { motion } from 'framer-motion';
@@ -40,7 +39,7 @@ function BettingComponent({ web3, isChatOpen, setIsChatOpen, userAddress, unread
   const [betAmount, setBetAmount] = useState('');
   const [ethAmount, setEthAmount] = useState('');
   const [ethAmountDonation, setEthAmountDonation] = useState('');
-
+  const [poolSize, setPoolSize] = useState('0');
 
   const { gameState, setGameState, resetGameState } = useContext(GameContext);
   const [finishStatus, setfinishStatus] = useState(false);
@@ -73,19 +72,22 @@ function BettingComponent({ web3, isChatOpen, setIsChatOpen, userAddress, unread
     }
   }, [web3]);
 
-  const onBackButtonEvent = (e) => {
-    e.preventDefault();
-    if (!finishStatus) {
-        if (window.confirm("You have placed a bet. Are you sure you want to leave? Leaving / refreshing will cause the elements in the page to not reflect you having placed a bet.")) {
-            setfinishStatus(true)
-            // your logic
-            navigate('/');
-        } else {
-            window.history.pushState(null, null, window.location.pathname);
-            setfinishStatus(false)
+  useEffect(() => {
+    const fetchPoolSize = async () => {
+      if (contract && web3) {
+        try {
+          const poolSizeWEI = await contract.methods.temporaryBalance().call();
+          const poolSizeEth = web3.utils.fromWei(poolSizeWEI, 'ether');
+          setPoolSize(poolSizeEth);
+          console.log("Pool size: " + poolSizeEth);
+        } catch (error) {
+          console.error("Error fetching pool size:", error);
         }
-    }
-  }
+      }
+    };
+
+    fetchPoolSize();
+  }, [contract, web3]);
 
   useEffect(() => {
     const handleBeforeUnload = (event) => {
@@ -101,6 +103,19 @@ function BettingComponent({ web3, isChatOpen, setIsChatOpen, userAddress, unread
         return window.confirm(confirmationMessage);
       }
       return true;
+    };
+
+    const onBackButtonEvent = (e) => {
+      e.preventDefault();
+      if (!finishStatus) {
+        if (window.confirm("You have placed a bet. Are you sure you want to leave? Leaving / refreshing will cause the elements in the page to not reflect you having placed a bet.")) {
+          setfinishStatus(true)
+          navigate('/');
+        } else {
+          window.history.pushState(null, null, window.location.pathname);
+          setfinishStatus(false)
+        }
+      }
     };
 
     window.addEventListener('beforeunload', handleBeforeUnload);
@@ -120,7 +135,7 @@ function BettingComponent({ web3, isChatOpen, setIsChatOpen, userAddress, unread
         window.onpopstate = null;
       }
     };
-  }, [gameState.bet.placed]);
+  }, [gameState.bet.placed, finishStatus, navigate]);
 
   // Convert USD amount to ETH
   useEffect(() => {
@@ -151,49 +166,46 @@ function BettingComponent({ web3, isChatOpen, setIsChatOpen, userAddress, unread
   }, []);
   
   // Get game state information
+  const timerHandler = useCallback((data) => {
+    console.log('Timer data received:', data);
+    
+    setGameState(prevState => ({ 
+      ...prevState, 
+      timer: data.countdown, 
+      stage: data.stage, 
+      exchange: data.exchange, 
+      total_red: data.total_red, 
+      total_black: data.total_black 
+    }));
+
+    switch (data.stage) {
+      case 0:
+        setGameState(prevState => ({
+          ...prevState,
+          has_visited_bet: true
+        }));
+        break;
+      case -1:
+      case 1:
+      case 2:
+        navigate('/transactions');
+        break;
+      case 3:
+        navigate('/roulette');
+        break;
+      default:
+        break;
+    }
+  }, [setGameState, navigate]);
+
+  // Set up the socket listener
   useEffect(() => {
-    const timerHandler = (data) => {
-      console.log('Timer data received:', data);
-      
-      // Update game state based on received data
-      setGameState(prevState => ({ 
-        ...prevState, 
-        timer: data.countdown, 
-        stage: data.stage, 
-        exchange: data.exchange, 
-        total_red: data.total_red, 
-        total_black: data.total_black 
-      }));
-  
-      // Navigation and additional state update based on stage
-      switch (data.stage) {
-        case 0:
-          setGameState(prevState => ({
-            ...prevState,
-            has_visited_bet: true
-          }));
-          break;
-        case -1:
-        case 1:
-        case 2:
-          navigate('/transactions');
-          break;
-        case 3:
-          navigate('/roulette');
-          break;
-        default:
-          break;
-      }
-    };
-  
-    // Listen for timer updates from server
     socket.on('timer', timerHandler);
   
-    // Cleanup function to remove the listener when the component is unmounted or dependencies change
     return () => {
       socket.off('timer', timerHandler);
     };
-  }, [setGameState, navigate]);
+  }, [timerHandler]);
 
   // Change styles according to state
   useEffect(() => {
@@ -210,6 +222,15 @@ function BettingComponent({ web3, isChatOpen, setIsChatOpen, userAddress, unread
     setIsPlacingBet(true);
     try {
       const accounts = await web3.eth.getAccounts();
+      const maxBetUSD = parseFloat(poolSize) * gameState.exchange; // 1% of pool size in USD
+      const betAmountUSD = parseFloat(ethAmount) * gameState.exchange;
+
+      if (betAmountUSD > maxBetUSD) {
+        alert(`Your bet is too large. The maximum bet allowed is $${maxBetUSD.toFixed(2)} USD.`);
+        setIsPlacingBet(false);
+        return;
+      }
+
       await contract.methods.setBet(guess).send({
         from: accounts[0],
         value: web3.utils.toWei(ethAmount, 'ether')
@@ -281,7 +302,7 @@ function BettingComponent({ web3, isChatOpen, setIsChatOpen, userAddress, unread
         value: web3.utils.toWei(ethAmountDonation, 'ether')
       });
 
-      const response = await database_api.post('/api/donations',{
+      await database_api.post('/api/donations',{
         userAddress: isAnonymous ? null : userAddress,
         donationAmountUSD: donationAmount,
         donationAmountETH: ethAmountDonation,
@@ -533,20 +554,20 @@ function BettingComponent({ web3, isChatOpen, setIsChatOpen, userAddress, unread
             onChange={e => setBetAmount(e.target.value)} 
             placeholder="Bet Amount in USD" 
             className={styles.betInput}
-            disabled={betPlaced != -1}
+            disabled={betPlaced !== -1}
           />
           {!isPlacingBet ? (
             <div className={styles.buttons}>
               <button 
                 onClick={() => placeBet(0)}
-                disabled={betPlaced != -1}
-                className={`${styles.button} ${styles.red} ${betPlaced == -1 ? styles.canHoverRed : ''} ${betPlaced == 0 ? styles.selected : ''}`}>
+                disabled={betPlaced !== -1}
+                className={`${styles.button} ${styles.red} ${betPlaced === -1 ? styles.canHoverRed : ''} ${betPlaced === 0 ? styles.selected : ''}`}>
                 Red
               </button>
               <button 
                 onClick={() => placeBet(1)} 
-                disabled={betPlaced != -1} 
-                className={`${styles.button} ${styles.black} ${betPlaced == -1 ? styles.canHoverBlack : ''} ${betPlaced == 1 ? styles.selected : ''}`}>
+                disabled={betPlaced !== -1} 
+                className={`${styles.button} ${styles.black} ${betPlaced === -1 ? styles.canHoverBlack : ''} ${betPlaced === 1 ? styles.selected : ''}`}>
                 Black
               </button>
             </div>

@@ -19,22 +19,21 @@ function TransactionComponent() {
   const [isLoaded, setIsLoaded] = useState(false); // State to track loading
   const [finishStatus, setfinishStatus] = useState(false);
   const [timeLeft, setTimeLeft] = useState('0'); // Timer state for stage 2
-
-  const onBackButtonEvent = (e) => {
-    e.preventDefault();
-    if (!finishStatus) {
-        if (window.confirm("You have placed a bet. Are you sure you want to leave? Leaving / refreshing will cause the elements in the page to not reflect you having placed a bet.")) {
-            setfinishStatus(true)
-            // your logic
-            navigate('/');
-        } else {
-            window.history.pushState(null, null, window.location.pathname);
-            setfinishStatus(false)
-        }
-    }
-  }
-
   useEffect(() => {
+    const onBackButtonEvent = (e) => {
+      e.preventDefault();
+      if (!finishStatus) {
+          if (window.confirm("You have placed a bet. Are you sure you want to leave? Leaving / refreshing will cause the elements in the page to not reflect you having placed a bet.")) {
+              setfinishStatus(true)
+              // your logic
+              navigate('/');
+          } else {
+              window.history.pushState(null, null, window.location.pathname);
+              setfinishStatus(false)
+          }
+      }
+    }
+
     const handleBeforeUnload = (event) => {
       if (gameState.bet.placed) {
         event.preventDefault(); // This is necessary to trigger the dialog
@@ -67,7 +66,7 @@ function TransactionComponent() {
         window.onpopstate = null;
       }
     };
-  }, [gameState.bet.placed]);
+  }, [gameState.bet.placed, finishStatus, navigate]);
 
   useEffect(() => {
     const timerHandler = (data) => {
@@ -111,7 +110,7 @@ function TransactionComponent() {
       default:
         break;
     }
-  }, [gameState, navigate]);
+  }, [gameState, navigate, isLoaded]);
 
   useEffect(() => {
     let timerInterval;
@@ -155,7 +154,7 @@ function TransactionComponent() {
             <hr className={commonStyles.line} />
             <div className={`${commonStyles.timer} ${styles.timer}`}>
               <span className={commonStyles.label}>Timer</span>
-              <div className={`${styles.countdown} ${commonStyles.info_text}`}>{gameState.stage === 1 || gameState.stage == -1 ? (gameState.timer > 120 ? 0 : gameState.timer) : timeLeft}</div>
+              <div className={`${styles.countdown} ${commonStyles.info_text}`}>{gameState.stage === 1 || gameState.stage === -1 ? (gameState.timer > 120 ? 0 : gameState.timer) : timeLeft}</div>
             </div>
         </div>
         <div id={commonStyles.spinner}>

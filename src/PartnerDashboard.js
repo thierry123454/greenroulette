@@ -4,7 +4,6 @@ import styles from './BecomePartner.module.css'; // Import CSS module for styles
 import commonStyles from './CommonStyles.module.css'; // Import CSS module for styles
 import { useNavigate } from 'react-router-dom';
 import { ReactComponent as Logo } from './images/logo.svg';
-import { ReactComponent as Mail } from './images/mail.svg';
 import rouletteContractAbi from './abis/rouletteContractAbi.json';
 import axios from 'axios';
 import Web3 from 'web3';
@@ -13,7 +12,6 @@ import { Pie } from 'react-chartjs-2';
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js';
 
 import ethereumLogo from './images/ethereum_logo.png';
-import xLogo from './images/x_logo.png';
 
 const contractAddress = "0xDE498a87437214F6862A1f4B46D05817799eBd48";
 
@@ -93,12 +91,9 @@ function PartnerDashboard() {
   const [contract, setContract] = useState(null);
   const [poolSize, setPoolSize] = useState('0');
   const [isPartner, setIsPartner] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
   const [web3, setWeb3] = useState(null);
   const [userAddress, setUserAddress] = useState('');
   const [contributionAmount, setContributionAmount] = useState(0);
-  const [additionalSharePercentage, setAdditionalSharePercentage] = useState(0);
-  const [additionalMonthlyEarnings, setAdditionalMonthlyEarnings] = useState(0);
   const [earningsOverTime, setEarningsOverTime] = useState({
     threeMonths: 0,
     sixMonths: 0,
@@ -122,10 +117,9 @@ function PartnerDashboard() {
     }
   }, [web3]);
 
-  const calculateEarningsOverTime = (months, newSharePercentage, poolParam = null) => {
+  const calculateEarningsOverTime = useCallback((months, newSharePercentage, poolParam = null) => {
     let currentPoolSize = poolParam ? parseFloat(poolParam) + parseFloat(contributionAmount) : parseFloat(poolSize) + parseFloat(contributionAmount);
 
-  
     let totalEarnings = 0;
     let monthlyShare = newSharePercentage / 100;
     for (let i = 0; i < months; i++) {
@@ -135,8 +129,7 @@ function PartnerDashboard() {
     }
     
     return Number(totalEarnings.toPrecision(3));
-  };
-  
+  }, [contributionAmount, poolSize]);
 
   const fetchUserData = useCallback(async (account, userContribution) => {
     if (contract && web3) {
@@ -176,7 +169,7 @@ function PartnerDashboard() {
         console.error('Error fetching user data:', error);
       }
     }
-  }, [contract, web3]);
+  }, [contract, web3, calculateEarningsOverTime]);
 
   const checkIfPartner = useCallback(async () => {
     console.log("Checking if partner");
@@ -210,18 +203,12 @@ function PartnerDashboard() {
           await checkIfPartner();
         } catch (error) {
           console.error('Error checking partner status:', error);
-        } finally {
-          setIsLoading(false);
         }
       }
     };
   
     if (web3) {
-      console.log("Web3 set");
       checkPartnerStatus();
-    } else {
-      console.log("Web3 not set");
-      setIsLoading(false);
     }
   }, [web3, checkIfPartner]);
 

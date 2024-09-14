@@ -16,35 +16,28 @@ function CountdownCircle({ duration, onReset }) {
     };
 
     const startAnimation = () => {
-      console.log('Starting countdown:', percent);
-
       const countdownTimeout = setTimeout(() => {
-        console.log('Counting down!');
         setPercent(0);
       }, initialWait);
       timeoutIds.push(countdownTimeout);
 
       const fadeoutTimeout = setTimeout(() => {
-        console.log('Countdown complete, fading out');
         setAnimationPhase('fadeOut');
       }, initialWait + duration);
       timeoutIds.push(fadeoutTimeout);
 
       const countdownReset = setTimeout(() => {
-        console.log('Resetting timer!');
         setPercent(100);
         onReset();
       }, initialWait + duration + 1000);
       timeoutIds.push(countdownReset);
 
       const fadeinTimeout = setTimeout(() => {
-        console.log('Fading in');
         setAnimationPhase('fadeIn');
       }, initialWait + duration + 1000 + duration);
       timeoutIds.push(fadeinTimeout);
 
       const restartTimeout = setTimeout(() => {
-        console.log('RESETTING!');
         resetAnimation(); // Restart the animation cycle
       }, initialWait + duration + 1000 + duration + 1000);
       timeoutIds.push(restartTimeout);
@@ -54,8 +47,9 @@ function CountdownCircle({ duration, onReset }) {
 
     return () => {
       timeoutIds.forEach(timeoutId => clearTimeout(timeoutId));
-      console.log('Cleanup called');
     };
+
+  // eslint-disable-next-line
   }, []);
 
   return (

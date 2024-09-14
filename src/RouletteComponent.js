@@ -14,7 +14,6 @@ import JoinLateNotice from './JoinLateNotice';
 // Define the roulette numbers and their colors
 const rouletteNumbers = "3-26-0-32-15-19-4-21-2-25-17-34-6-27-13-36-11-30-8-23-10-5-24-16-33-1-20-14-31-9-22-18-29-7-28-12-35".split('-');
 const redNumbers = new Set([32, 19, 21, 25, 34, 27, 36, 30, 23, 5, 16, 1, 14, 9, 18, 7, 12, 3]);
-const blackNumbers = new Set([15, 4, 2, 17, 6, 13, 11, 8, 10, 24, 33, 20, 31, 22, 29, 28, 35, 26]);
 const adjustedNumbers = "0-32-15-19-4-21-2-25-17-34-6-27-13-36-11-30-8-23-10-5-24-16-33-1-20-14-31-9-22-18-29-7-28-12-35-3-26".split('-');
 
 // Initialize socket connection
@@ -22,7 +21,7 @@ const socket = io('https://localhost:3001', { secure: true });
 
 const calculateTransform = (winningNumber) => {
   const baseTranslation = -9842 - 45; // Base translation for two full rotations
-  const findWinning = (element) => element == winningNumber;
+  const findWinning = (element) => element === winningNumber;
   const winningIndex = adjustedNumbers.findIndex(findWinning);
   const additionalTranslation = winningIndex * -133; // Each tile's width, change the number based on your actual tile width
   return baseTranslation + additionalTranslation;
@@ -35,21 +34,21 @@ function RouletteComponent() {
   const [transformX, setTransformX] = useState(-45);
   const [finishStatus, setfinishStatus] = useState(false);
 
-  const onBackButtonEvent = (e) => {
-    e.preventDefault();
-    if (!finishStatus) {
-        if (window.confirm("You have placed a bet. Are you sure you want to leave? Leaving / refreshing will cause the elements in the page to not reflect you having placed a bet.")) {
-            setfinishStatus(true)
-            // your logic
-            navigate('/');
-        } else {
-            window.history.pushState(null, null, window.location.pathname);
-            setfinishStatus(false)
-        }
-    }
-  }
-
   useEffect(() => {
+    const onBackButtonEvent = (e) => {
+      e.preventDefault();
+      if (!finishStatus) {
+          if (window.confirm("You have placed a bet. Are you sure you want to leave? Leaving / refreshing will cause the elements in the page to not reflect you having placed a bet.")) {
+              setfinishStatus(true)
+              // your logic
+              navigate('/');
+          } else {
+              window.history.pushState(null, null, window.location.pathname);
+              setfinishStatus(false)
+          }
+      }
+    }
+
     const handleBeforeUnload = (event) => {
       if (gameState.bet.placed) {
         event.preventDefault(); // This is necessary to trigger the dialog
@@ -82,7 +81,7 @@ function RouletteComponent() {
         window.onpopstate = null;
       }
     };
-  }, [gameState.bet.placed]);
+  }, [gameState.bet.placed, finishStatus, navigate]);
 
   useEffect(() => {
     setIsLoaded(true); // Set to true when component mounts
@@ -151,7 +150,7 @@ function RouletteComponent() {
             return (
               <div key={index} className={styles.tile}>
                 <TileComponent />
-                <span id={`${TileComponent == Zero ? styles.zero : redNumbers.has(parseInt(number)) ? styles.red : styles.black}`} className={styles.numberLabel}>{number}</span>
+                <span id={`${TileComponent === Zero ? styles.zero : redNumbers.has(parseInt(number)) ? styles.red : styles.black}`} className={styles.numberLabel}>{number}</span>
               </div>
             );
           })}

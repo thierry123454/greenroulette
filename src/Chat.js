@@ -44,7 +44,6 @@ function Chat({ setIsChatOpen, isChatOpen, setUnreadCounter }) {
         try {
           const response = await database_api.get(`/api/get_username/${userAddress}`);
           if (response.data.username) {
-            console.log("Found username!", response.data.username);
             setUsername(response.data.username);
           }
         } catch (error) {
@@ -72,22 +71,25 @@ function Chat({ setIsChatOpen, isChatOpen, setUnreadCounter }) {
   }, [checkIfPartner, userAddress]);
 
   useEffect(() => {
-    socket.on('message', message => {
+    const messageHandler = (message) => {
       if (!isChatOpen) setUnreadCounter(prevCounter => prevCounter + 1);
 
       setMessages(prev => [...prev, message]);
-      console.log(messages);
-    });
+    };
 
-    // Listen for online users count updates
-    socket.on('onlineUsers', (count) => {
+    const onlineUsersHandler = (count) => {
       setOnlineUsers(count);
-    });
+    };
+
+    socket.on('message', messageHandler);
+    socket.on('onlineUsers', onlineUsersHandler);
 
     // Cleanup on component unmount
-    return () => socket.off('message');
-    socket.off('onlineUsers');
-  }, []);
+    return () => {
+      socket.off('message', messageHandler);
+      socket.off('onlineUsers', onlineUsersHandler);
+    };
+  }, [isChatOpen, messages, setUnreadCounter]);
 
   // Get game state information
   useEffect(() => {
@@ -120,9 +122,6 @@ function Chat({ setIsChatOpen, isChatOpen, setUnreadCounter }) {
 
   useEffect(() => {
     if (messagesEndRef.current) {
-      console.log(messagesEndRef.current.scrollTop);
-      console.log(messagesEndRef.current.scrollHeight);
-      console.log(messagesEndRef.current.scrollHeight - messagesEndRef.current.scrollTop);
       if (messagesEndRef.current.scrollTop >= messagesEndRef.current.scrollHeight - 400)
         messagesEndRef.current.scrollTop = messagesEndRef.current.scrollHeight;
     }
@@ -130,8 +129,6 @@ function Chat({ setIsChatOpen, isChatOpen, setUnreadCounter }) {
 
   const sendMessage = () => {
     if (input.trim() && input.length <= 200) {
-      console.log(username);
-      console.log("isPartner: ", isPartner);
       socket.emit('send message', userAddress, username, bet.choice, bet.amount, input, isPartner);
       setInput('');
     }
@@ -141,11 +138,6 @@ function Chat({ setIsChatOpen, isChatOpen, setUnreadCounter }) {
     setUnreadCounter(0);
     setIsChatOpen(false);
   };
-
-  function isEthereumAddress(address) {
-    // Check if the address starts with '0x' and is 42 characters long
-    return /^0x[a-fA-F0-9]{40}$/.test(address);
-  }
 
   return (
     <div className={`${commonStyles.popUpContainer} ${styles.chatContainer} ${isChatOpen ? styles.open : styles.closed}`}>

@@ -1,6 +1,6 @@
 // App.js
 import React, { useState, useEffect, useContext } from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { Routes, Route } from 'react-router-dom';
 import BettingComponent from './BettingComponent';
 import TransactionComponent from './TransactionComponent';
 import RouletteComponent from './RouletteComponent';
@@ -9,7 +9,6 @@ import LandingPage from './LandingPage';
 import GettingStarted from './GettingStarted';
 import BecomePartner from './BecomePartner';
 import PartnerDashboard from './PartnerDashboard';
-import Web3 from 'web3';
 import detectEthereumProvider from '@metamask/detect-provider';
 import { GameContext } from './GameContext';
 
@@ -24,7 +23,7 @@ function App() {
   const [isChatOpen, setIsChatOpen] = useState(false); // State to control chat visibility
   const [web3, setWeb3] = useState(null); // Maintain web3 state at the App level
   const [userAddress, setUserAddress] = useState('');
-  const { gameState, setGameState } = useContext(GameContext);
+  const { setGameState } = useContext(GameContext);
   const [unreadCounter, setUnreadCounter] = useState(0);
 
   useEffect(() => {
@@ -62,7 +61,7 @@ function App() {
         provider.removeListener('accountsChanged', handleAccountsChanged);
       }
     };
-  }, [web3]);
+  }, [web3, setGameState]);
 
   const checkAndAddPlayer = async (address) => {
     const response = await database_api.post('/api/add-player', { address });

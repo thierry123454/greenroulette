@@ -1,5 +1,5 @@
 // LandingPage.js
-import React, { useEffect, useState, useCallback, useRef } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import styles from './LandingPage.module.css'; // Import CSS module for styles
 import commonStyles from './CommonStyles.module.css'; // Import CSS module for styles
 import { useNavigate } from 'react-router-dom';
@@ -173,12 +173,15 @@ function LandingPage() {
 
     const observer = new IntersectionObserver(observerCallback, observerOptions);
 
-    if (fadeInRef1.current) observer.observe(fadeInRef1.current);
-    if (fadeInRef2.current) observer.observe(fadeInRef2.current);
+    const currentFadeInRef1 = fadeInRef1.current;
+    const currentFadeInRef2 = fadeInRef2.current;
+
+    if (currentFadeInRef1) observer.observe(currentFadeInRef1);
+    if (currentFadeInRef2) observer.observe(currentFadeInRef2);
 
     return () => {
-      if (fadeInRef1.current) observer.unobserve(fadeInRef1.current);
-      if (fadeInRef2.current) observer.unobserve(fadeInRef2.current);
+      if (currentFadeInRef1) observer.unobserve(currentFadeInRef1);
+      if (currentFadeInRef2) observer.unobserve(currentFadeInRef2);
     };
   }, []);
 
@@ -234,8 +237,15 @@ function LandingPage() {
           <div className={styles.cardContainer} ref={fadeInRef1}>
             <div className={styles.cardWrapper}>
               <div className={`${styles.cards} ${animate ? styles.goLeftAnimation : ''}`}>
-                {cards.map(card => (
-                  <Card logo={card.logo} alt={card.alt} description={card.description} fontSize={card.fontSize} black={card.black} />
+                {cards.map((card, index) => (
+                  <Card 
+                    key={index}
+                    logo={card.logo} 
+                    alt={card.alt} 
+                    description={card.description} 
+                    fontSize={card.fontSize} 
+                    black={card.black} 
+                  />
                 ))}
               </div>
             </div>
@@ -278,31 +288,29 @@ function LandingPage() {
                 <span className={styles.leaderboardHeaderText}>Top Donators 🌍</span>
               </div>
 
-              {topDonators.map((donator, index) => (
-                <>
-                  {index <= 2 &&
-                    <motion.div className={styles.topEntry}
-                    initial={{ opacity: 0, translateY: 20 }}
-                    animate={{ opacity: 1, translateY: 0 }}
-                    transition={{ duration: 0.6, delay: index * 0.2 }}
-                    >
-                      {index === 0 ? <Medal1 className={styles.medal} /> :
-                      index === 1 ? <Medal2 className={styles.medal} /> :
-                      index === 2 ? <Medal3 className={styles.medal} /> : null}
-                      <div className={styles.entryInfo}>
-                        <span className={styles.entryAddress}>
-                          {donator.username ? donator.username : 
-                          (donator.address.substring(0, 6) + '...' + donator.address.substring(donator.address.length - 4))}
-                        </span>
-                        <br />
-                        <span className={`${styles.entryAmount} ${index == 0 && styles.top}`}>
-                          {parseFloat(donator.total_donated)}
-                          <img src={ethereumLogo} alt="ETH" className={styles.ethLogo} />
-                        </span>
-                      </div>
-                    </motion.div>
-                  }
-                </>
+              {topDonators.slice(0, 3).map((donator, index) => (
+                <motion.div
+                  key={donator.address}
+                  className={styles.topEntry}
+                  initial={{ opacity: 0, translateY: 20 }}
+                  animate={{ opacity: 1, translateY: 0 }}
+                  transition={{ duration: 0.6, delay: index * 0.2 }}
+                >
+                  {index === 0 ? <Medal1 className={styles.medal} /> :
+                   index === 1 ? <Medal2 className={styles.medal} /> :
+                   <Medal3 className={styles.medal} />}
+                  <div className={styles.entryInfo}>
+                    <span className={styles.entryAddress}>
+                      {donator.username || 
+                       (donator.address.substring(0, 6) + '...' + donator.address.substring(donator.address.length - 4))}
+                    </span>
+                    <br />
+                    <span className={`${styles.entryAmount} ${index === 0 && styles.top}`}>
+                      {parseFloat(donator.total_donated)}
+                      <img src={ethereumLogo} alt="ETH" className={styles.ethLogo} />
+                    </span>
+                  </div>
+                </motion.div>
               ))}
 
               <div className={styles.regularEntries}>
@@ -311,7 +319,8 @@ function LandingPage() {
                 {
                   index > 2 &&
                   <>
-                    <motion.div className={`${commonStyles.entry} ${styles.entry}`}
+                    <motion.div
+                    key={donator.address} className={`${commonStyles.entry} ${styles.entry}`}
                     initial={{ opacity: 0, translateY: 20 }}
                     animate={{ opacity: 1, translateY: 0 }}
                     transition={{ duration: 0.6, delay: 0.5 + index * 0.2 }}
@@ -360,7 +369,7 @@ function LandingPage() {
                           (winner.address.substring(0, 6) + '...' + winner.address.substring(winner.address.length - 4))}
                         </span>
                         <br />
-                        <span className={`${styles.entryAmount} ${index == 0 && styles.top}`}>
+                        <span className={`${styles.entryAmount} ${index === 0 && styles.top}`}>
                           {parseFloat(winner.total_win)}
                           <img src={ethereumLogo} alt="ETH" className={styles.ethLogo} />
                         </span>
@@ -403,7 +412,7 @@ function LandingPage() {
 
         <div className={styles.buttonGroup}>
             <button className={styles.footbarButton}><Mail /></button>
-            <button className={styles.footbarButton}><img src={xLogo}></img></button>
+            <button className={styles.footbarButton}><img src={xLogo} alt="X logo" /></button>
           </div>
       </div>
     </>

@@ -1,9 +1,8 @@
 // BecomePartner.js
-import React, { useEffect, useState, useCallback, useRef } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import styles from './BecomePartner.module.css'; // Import CSS module for styles
 import commonStyles from './CommonStyles.module.css'; // Import CSS module for styles
 import { useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
 import { ReactComponent as Logo } from './images/logo.svg';
 import { ReactComponent as Mail } from './images/mail.svg';
 import { ReactComponent as Explanation } from './images/explaination.svg';
@@ -98,7 +97,6 @@ function BecomePartner({ web3 }) {
 
   const [contributionAmount, setContributionAmount] = useState('');
   const [userShare, setUserShare] = useState(0);
-  const [totalPartnerContributions, setTotalPartnerContributions] = useState(0);
   const [sharePercentage, setSharePercentage] = useState(0);
   const [estimatedMonthlyEarnings, setEstimatedMonthlyEarnings] = useState(0);
   const [isAlreadyPartner, setIsAlreadyPartner] = useState(-1);
@@ -109,14 +107,6 @@ function BecomePartner({ web3 }) {
     twoYears: 0
   });
   const [warningMessage, setWarningMessage] = useState('');
-  useEffect(() => {
-    database_api.get('/api/get_all_partners')
-      .then(response => {
-        const total = response.data.partners.reduce((sum, partner) => sum + partner.contribution, 0);
-        setTotalPartnerContributions(total);
-      })
-      .catch(error => console.error('Error fetching partners:', error));
-  }, []);
 
   const handleKeyPress = (e) => {
     if (e.key === 'Enter') {
@@ -144,12 +134,6 @@ function BecomePartner({ web3 }) {
   const [totalContributions, setTotalContributions] = useState('0');
   const [totalRewards, setTotalRewards] = useState('0');
 
-  useEffect(() => {
-    if (web3 && contract) {
-      fetchContractData();
-    }
-  }, [web3, contract]);
-
   const fetchContractData = useCallback(async () => {
     if (contract && web3) {
       try {
@@ -169,6 +153,12 @@ function BecomePartner({ web3 }) {
       }
     }
   }, [contract, web3]);
+
+  useEffect(() => {
+    if (web3 && contract) {
+      fetchContractData();
+    }
+  }, [web3, contract, fetchContractData]);
 
   const handleBecomePartner = async () => {
     if (!web3 || !contract || !contributionAmount) {
@@ -252,7 +242,7 @@ function BecomePartner({ web3 }) {
 
       setIsAlreadyPartner(userIsPartner ? 1 : 0);
 
-      if (userIsPartner == 0) {
+      if (!userIsPartner) {
         const response = await database_api.get('/api/get_all_partners');
         const totalContributions = response.data.partners.reduce((sum, partner) => sum + partner.contribution, 0) + parseFloat(contributionAmount);
         const newSharePercentage = (parseFloat(contributionAmount) / totalContributions) * 100;
@@ -269,6 +259,7 @@ function BecomePartner({ web3 }) {
           oneYear: calculateEarningsOverTime(12, newSharePercentage),
           twoYears: calculateEarningsOverTime(24, newSharePercentage)
         });
+
 
         const monthsUntilNoWithdrawal = checkPoolSizeVsContribution(24);
         if (monthsUntilNoWithdrawal !== -1) {
@@ -465,7 +456,7 @@ function BecomePartner({ web3 }) {
             onKeyPress={handleKeyPress}
           />
           <button className={styles.button} onClick={calculateEarnings}>Calculate Earnings 💸</button>
-          {isAlreadyPartner == -1 ? <></> : 
+          {isAlreadyPartner === -1 ? <></> : 
           (isAlreadyPartner === 1 ? (
               <div className={`${commonStyles.content} ${styles.alreadyPartner}`}>
                 <p className={`${styles.infoText} ${styles.small}`}>

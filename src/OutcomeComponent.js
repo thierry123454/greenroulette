@@ -15,17 +15,10 @@ const socket = io('https://localhost:3001', { secure: true });
 const redNumbers = new Set([32, 19, 21, 25, 34, 27, 36, 30, 23, 5, 16, 1, 14, 9, 18, 7, 12, 3]);
 const blackNumbers = new Set([15, 4, 2, 17, 6, 13, 11, 8, 10, 24, 33, 20, 31, 22, 29, 28, 35, 26]);
 
-const roundTwoDecimals = (number) => {
-  return Math.round((number + Number.EPSILON) * 100) / 100
-};
-
 function OutcomeComponent() {
   const navigate = useNavigate();
   const { gameState, setGameState } = useContext(GameContext);
   const [isLoaded, setIsLoaded] = useState(false); // State to track loading
-  const [totalWon, setTotalWon] = useState(0); // State to track loading
-  const [totalDonated, setTotalDonated] = useState(0); // State to track loading
-  const [playerWon, setTotalPlayerWon] = useState(0); // State to track loading
   const [outcome, setOutcome] = useState(null);
   const { width, height } = useWindowSize();  // Get window size for Confetti
 
@@ -97,10 +90,6 @@ function OutcomeComponent() {
       console.log(total_won);
       console.log(donated);
 
-      setTotalWon(total_won * gameState.exchange);
-      setTotalDonated(donated * gameState.exchange);
-      setTotalPlayerWon(gameState.bet.amount * gameState.exchange);
-
       valuesRef.current = {
         totalWon: total_won * gameState.exchange,
         totalDonated: donated * gameState.exchange,
@@ -124,19 +113,19 @@ function OutcomeComponent() {
     <div className={`${commonStyles.container} ${isLoaded ? commonStyles.loaded : ''}`}>
       {outcome === 0 && <Confetti width={width} height={height} />} 
       <div className={`${commonStyles.content} ${styles.content}`}>
-        <h1 id={styles.header} className={`${outcome == 0 ? styles.bright : styles.sad}`}>
-          {outcome == 0 ? "CONGRATULATIONS!" : (outcome == 1 ? "TRY AGAIN!" : "NO BET DETECTED!")}
+        <h1 id={styles.header} className={`${outcome === 0 ? styles.bright : styles.sad}`}>
+          {outcome === 0 ? "CONGRATULATIONS!" : (outcome === 1 ? "TRY AGAIN!" : "NO BET DETECTED!")}
         </h1>
-        <span id={styles.consolidation}>{outcome == 1 ? "Don't be sad however..." : ""}</span>
+        <span id={styles.consolidation}>{outcome === 1 ? "Don't be sad however..." : ""}</span>
         <div className={`${commonStyles.info} ${styles.info}`}>
             <div className={`${commonStyles.status} ${styles.wonInfo}`}>
               <h2 className={styles.title}>
-                {outcome == 0 ? "You Won🏆" : (outcome == 1 ? "You Donated🌳*" : "Others Won🏆")}
+                {outcome === 0 ? "You Won🏆" : (outcome === 1 ? "You Donated🌳*" : "Others Won🏆")}
               </h2>
               <span className={styles.amount}>
-                {outcome == 0 ? (
+                {outcome === 0 ? (
                   <CountUp duration={5} end={valuesRef.current.playerWon} suffix="$" />
-                ) : outcome == 1 ? (
+                ) : outcome === 1 ? (
                   <CountUp duration={5} end={valuesRef.current.playerWon * 0.75} suffix="$" />
                 ) : (
                   <CountUp duration={5} end={valuesRef.current.totalWon} suffix="$" />
@@ -146,7 +135,7 @@ function OutcomeComponent() {
             <hr className={commonStyles.line} />
             <div className={`${commonStyles.timer} ${styles.donatedInfo}`}>
               <h2 className={styles.title}>Total Donated This Round🌍*</h2>
-              <span className={styles.amount}><CountUp duration={10} end={totalDonated} suffix="$" /></span>
+              <span className={styles.amount}><CountUp duration={10} end={valuesRef.current.totalDonated} suffix="$" /></span>
               <span id={styles.subtext}>* Actual donation amount may be less if future bets decrease pool size.</span>
             </div>
         </div>

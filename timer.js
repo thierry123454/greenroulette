@@ -3,10 +3,8 @@ const fs = require('fs');
 const express = require('express');
 const socketIo = require('socket.io');
 const { Web3 } = require('web3');
-const ethers = require('ethers');
 
 // Load ABIs
-const abi_random = require('./randomContractAbi.json');
 const abi_roulette = require('./src/abis/rouletteContractAbi.json');
 
 // Define the sets of numbers for each color
@@ -41,7 +39,7 @@ web3.eth.accounts.wallet.add(account);
 
 const rouletteContract = new web3.eth.Contract(abi_roulette, rouletteContractAddress);
 
-let stageOneTimer = 100;
+let stageZeroTimer = 100;
 let secondaryTimer = 125;
 let stageThreeTimer = 50;
 
@@ -107,69 +105,6 @@ function emitInfo(countdown, stage) {
   });
 }
 
-function waitForPlayers () {
-  const countdown = setInterval(() => {
-    console.log("Waiting for players...")
-
-    if (playerCount >= 1) {
-      console.log("Players detected!");
-      openBetting();
-      stage = 0;
-      stageOneTimer = 100;
-      secondaryTimer = 125;
-      outcome = -1;
-      startStageOne();
-      clearInterval(countdown);
-      return;
-    }
-  }, 1000);
-}
-
-function noBets() {
-  let timer = 10;
-
-  const countdown = setInterval(() => {
-    console.log("No bets detected. Resetting!")
-
-    if (playerCount >= 1 && timer <= 0) {
-      waitForPlayers();
-      clearInterval(countdown);
-      return;
-    }
-
-    timer -=1;
-
-    emitInfo(timer, -1);
-  }, 1000);
-}
-
-function startStageOne() {
-  getEthPrice();
-
-  totalRed = 0; // Reset totals when going back to stage 0
-  totalBlack = 0;
-  lastCheckedIndex = 0;
-
-  const countdown = setInterval(() => {
-    if (stageOneTimer <= 0) {
-      console.log("Stage 1 ended.");
-      clearInterval(countdown);
-      stage = 1;
-      return;
-    }
-
-    // Fetch ETH price every 10 seconds and check new bets.
-    if (stageOneTimer % 10 === 0) {
-      getEthPrice();
-      checkNewBets();
-    }
-
-    console.log("Stage 0:", stageOneTimer);
-    emitInfo(stageOneTimer, 0);
-    stageOneTimer--;
-  }, 1000);
-}
-
 async function checkNewBets() {
   console.log("Checking for bets.");
   const bettorCount = await rouletteContract.methods.getNumberOfBets().call();
@@ -203,125 +138,6 @@ async function checkNewBets() {
     
     lastCheckedIndex++;
   }
-}
-
-function checkBettingClosed() {
-  console.log("Checking if betting is closing.");
-  // This creates a subscription to listen for the BettingClosed event
-
-  const bettingClosedCheck = setInterval(() => {
-    rouletteContract.events.BettingClosed({
-      fromBlock: 'latest'
-    })
-    .on('data', event => {
-      console.log("Event received. Betting closes in 2 minutes!");
-
-      // Reset and start the secondary timer upon receiving the event
-      clearInterval(bettingClosedCheck);
-      secondaryTimer = 125;
-      startSecondaryTimer();
-      return;
-    })
-  }, 5000);
-}
-
-function startSecondaryTimer() {
-  const secondaryCountdown = setInterval(() => {
-    console.log("Betting closes in:", secondaryTimer)
-    if (stage == 1) {
-      // Fetch ETH price every 10 seconds and check new bets.
-      if (secondaryTimer % 10 === 0) {
-        getEthPrice();
-        checkNewBets();
-      }
-
-      if (secondaryTimer <= 0) {
-        console.log("Stage is 1 and betting has closed. Fetching RN.")
-
-        clearInterval(secondaryCountdown);
-        
-        if (lastCheckedIndex == 0) {
-          noBets();
-        } else {
-          lastRandomNumber = null;
-          fetchRandomNumberUntilChange();
-          stage = 2;
-        }
-
-        return;
-      }
-      emitInfo(secondaryTimer, 1);
-    }
-    secondaryTimer--;
-  }, 1000);
-}
-
-async function fetchRandomNumberUntilChange() {
-  try {
-    const currentRandomNumber = await fetchRandomNumber();
-    console.log("Last random number:", lastRandomNumber)
-    console.log("Current random number:", currentRandomNumber)
-
-    if (currentRandomNumber == null || lastRandomNumber === null || lastRandomNumber == currentRandomNumber) {
-      lastRandomNumber = currentRandomNumber;
-      setTimeout(fetchRandomNumberUntilChange, 5000); // Fetch every 5 seconds
-    } else {
-      // Numbers have changed, proceed to stage 3
-      prepareForPayout(Number(currentRandomNumber % BigInt(37)));
-    }
-  
-    emitInfo(lastRandomTimestamp, 2);
-  } catch (error) {
-    console.error('Error fetching random number:', error);
-  }
-}
-
-// The function to fetch a random number and convert it to 0 or 1 based on its color
-function convertRandomNumber(randomNumber) {
-  // Convert the random number to 0 (red) or 1 (black)
-  if (redNumbers.has(randomNumber)) {
-    return 0; // Red
-  } else if (blackNumbers.has(randomNumber)) {
-    return 1; // Black
-  } else {
-    return 2;
-  }
-}
-
-async function prepareForPayout(randomNumber) {
-  stageThreeTimer = 50; // Reset stage three timer
-  stage = 3;
-  globalRandomNumber = randomNumber;
-  outcome = convertRandomNumber(randomNumber);
-  payoutWinners(outcome);
-  // openBettingAtFourty(); // Open betting 40 seconds into stage 3
-
-  const countdown = setInterval(() => {
-    getEthPrice();
-    if (stageThreeTimer <= 0) {
-      console.log("Stage 3 ended.");
-      clearInterval(countdown);
-
-      if (playerCount >= 1) {
-        stage = 0;
-        stageOneTimer = 100;
-        openBetting();
-        startStageOne(); // Restart stage one
-        outcome = -1;
-      } else {
-        waitForPlayers();
-      }
-
-      return;
-    }
-    stageThreeTimer--;
-    console.log("Stage 3:", stageThreeTimer);
-    io.emit('timer', { countdown: stageThreeTimer, stage: 3, exchange: currentEthPrice, game_outcome: randomNumber, total_red: totalRed, total_black: totalBlack });
-  }, 1000);
-}
-
-async function openBettingAtFourty() {
-  setTimeout(openBetting, 40000);
 }
 
 async function openBetting() {
@@ -380,9 +196,187 @@ async function fetchRandomNumber() {
     return null;
 }
 
+// The function to fetch a random number and convert it to 0 or 1 based on its color
+function convertRandomNumber(randomNumber) {
+  // Convert the random number to 0 (red) or 1 (black)
+  if (redNumbers.has(randomNumber)) {
+    return 0; // Red
+  } else if (blackNumbers.has(randomNumber)) {
+    return 1; // Black
+  } else {
+    return 2;
+  }
+}
+
+function waitForPlayers () {
+  const countdown = setInterval(() => {
+    console.log("Waiting for players...")
+
+    if (playerCount >= 1) {
+      console.log("Players detected!");
+      openBetting();
+      stage = 0;
+      stageZeroTimer = 100;
+      secondaryTimer = 125;
+      outcome = -1;
+      startStageZero();
+      clearInterval(countdown);
+      return;
+    }
+  }, 1000);
+}
+
+
+function startStageZero() {
+  getEthPrice();
+
+  totalRed = 0; // Reset totals when going back to stage 0
+  totalBlack = 0;
+  lastCheckedIndex = 0;
+
+  const countdown = setInterval(() => {
+    if (stageZeroTimer <= 0) {
+      console.log("Stage 0 ended.");
+      clearInterval(countdown);
+      stage = 1;
+      return;
+    }
+
+    // Fetch ETH price every 10 seconds and check new bets.
+    if (stageZeroTimer % 10 === 0) {
+      getEthPrice();
+      checkNewBets();
+    }
+
+    console.log("Stage 0:", stageZeroTimer);
+    emitInfo(stageZeroTimer, 0);
+    stageZeroTimer--;
+  }, 1000);
+}
+
+function checkBettingClosed() {
+  console.log("Checking if betting is closing.");
+  // This creates a subscription to listen for the BettingClosed event
+
+  const bettingClosedCheck = setInterval(() => {
+    rouletteContract.events.BettingClosed({
+      fromBlock: 'latest'
+    })
+    .on('data', event => {
+      console.log("Event received. Betting closes in 2 minutes!");
+
+      // Reset and start the secondary timer upon receiving the event
+      clearInterval(bettingClosedCheck);
+      secondaryTimer = 125;
+      startSecondaryTimer();
+      return;
+    })
+  }, 5000);
+}
+
+function noBets() {
+  let timer = 10;
+
+  const countdown = setInterval(() => {
+    console.log("No bets detected. Resetting!")
+
+    if (playerCount >= 1 && timer <= 0) {
+      waitForPlayers();
+      clearInterval(countdown);
+      return;
+    }
+
+    timer -=1;
+
+    emitInfo(timer, -1);
+  }, 1000);
+}
+
+function startSecondaryTimer() {
+  const secondaryCountdown = setInterval(() => {
+    console.log("Betting closes in:", secondaryTimer)
+    if (stage == 1) {
+      // Fetch ETH price every 10 seconds and check new bets.
+      if (secondaryTimer % 10 === 0) {
+        getEthPrice();
+        checkNewBets();
+      }
+
+      if (secondaryTimer <= 0) {
+        console.log("Stage is 1 and betting has closed. Fetching RN.")
+
+        clearInterval(secondaryCountdown);
+        
+        if (lastCheckedIndex == 0) {
+          noBets();
+        } else {
+          lastRandomNumber = null;
+          fetchRandomNumberUntilChange();
+          stage = 2;
+        }
+
+        return;
+      }
+      emitInfo(secondaryTimer, 1);
+    }
+    secondaryTimer--;
+  }, 1000);
+}
+
+async function fetchRandomNumberUntilChange() {
+  try {
+    const currentRandomNumber = await fetchRandomNumber();
+    console.log("Last random number:", lastRandomNumber)
+    console.log("Current random number:", currentRandomNumber)
+
+    if (currentRandomNumber == null || lastRandomNumber === null || lastRandomNumber == currentRandomNumber) {
+      lastRandomNumber = currentRandomNumber;
+      setTimeout(fetchRandomNumberUntilChange, 5000); // Fetch every 5 seconds
+    } else {
+      // Numbers have changed, proceed to stage 3
+      prepareForPayout(Number(currentRandomNumber % BigInt(37)));
+    }
+  
+    emitInfo(lastRandomTimestamp, 2);
+  } catch (error) {
+    console.error('Error fetching random number:', error);
+  }
+}
+
+
+async function prepareForPayout(randomNumber) {
+  stageThreeTimer = 50; // Reset stage three timer
+  stage = 3;
+  globalRandomNumber = randomNumber;
+  outcome = convertRandomNumber(randomNumber);
+  payoutWinners(outcome);
+
+  const countdown = setInterval(() => {
+    getEthPrice();
+    if (stageThreeTimer <= 0) {
+      console.log("Stage 3 ended.");
+      clearInterval(countdown);
+
+      if (playerCount >= 1) {
+        stage = 0;
+        stageZeroTimer = 100;
+        openBetting();
+        startStageZero(); // Restart stage one
+        outcome = -1;
+      } else {
+        waitForPlayers();
+      }
+
+      return;
+    }
+    stageThreeTimer--;
+    console.log("Stage 3:", stageThreeTimer);
+    io.emit('timer', { countdown: stageThreeTimer, stage: 3, exchange: currentEthPrice, game_outcome: randomNumber, total_red: totalRed, total_black: totalBlack });
+  }, 1000);
+}
+
 // Start the initial stage as soon as the server starts
 waitForPlayers();
-
 // noBets();
 // payoutWinners(0);
 // fetchRandomNumberUntilChange();
@@ -393,7 +387,7 @@ io.on('connection', (socket) => {
   playerCount += 1;
   
   if (stage == 0) {
-    emitInfo(stageOneTimer, 0);
+    emitInfo(stageZeroTimer, 0);
   } else if (stage == 1) {
     emitInfo(secondaryTimer, 1);
   } else if (stage == 2) {
