@@ -3,6 +3,7 @@ const fs = require('fs');
 const express = require('express');
 const socketIo = require('socket.io');
 const { Web3 } = require('web3');
+const axios = require('axios');
 
 // Load ABIs
 const abi_roulette = require('./src/abis/rouletteContractAbi.json');
@@ -57,6 +58,7 @@ let totalRed = 0;
 let totalBlack = 0;
 
 let lastCheckedIndex = 0;  // To track the last index of bets we checked
+let currentBets = [];
 
 const mysql = require('mysql2/promise');  // Use promise-based MySQL client
 
@@ -114,6 +116,13 @@ async function checkNewBets() {
     const ethAmount = parseFloat(web3.utils.fromWei(betDetails.amount, 'ether'));
     const guess =  Number(betDetails.guess);
 
+    // Add bet to currentBets array
+    currentBets.push({
+      address: bettor,
+      amount: ethAmount,
+      guess: guess
+    });
+
     console.log(`New bet from ${bettor}: Amount ${web3.utils.fromWei(betDetails.amount, 'ether')} ETH on ${guess === 0 ? 'Red' : 'Black'}`);
 
     // Fetch the username from the database
@@ -138,6 +147,37 @@ async function checkNewBets() {
     
     lastCheckedIndex++;
   }
+}
+
+// Add this function to update player totals
+async function updatePlayerTotals(outcome) {
+  for (const bet of currentBets) {
+    let winAmount = 0;
+    if ((outcome === 0 && bet.guess === 0) || (outcome === 1 && bet.guess === 1)) {
+      winAmount = bet.amount; // Double the bet for winners
+    }
+
+    try {
+      // Update total_win for winners
+      if (winAmount > 0) {
+        await axios.post('http://localhost:6969/api/update_total_win', {
+          address: bet.address,
+          amount: winAmount.toFixed(8)
+        });
+      } else {
+        // Update total_donated for all players (including winners)
+        await axios.post('http://localhost:6969/api/update_total_donated', {
+          address: bet.address,
+          amount: (bet.amount * 0.67).toFixed(8)
+        });
+      }
+    } catch (error) {
+      console.error(`Error updating totals for ${bet.address}:`, error.message);
+    }
+  }
+
+  // Clear the bets array after processing
+  currentBets = [];
 }
 
 async function openBetting() {
@@ -350,6 +390,7 @@ async function prepareForPayout(randomNumber) {
   globalRandomNumber = randomNumber;
   outcome = convertRandomNumber(randomNumber);
   payoutWinners(outcome);
+  updatePlayerTotals(outcome);
 
   const countdown = setInterval(() => {
     getEthPrice();
